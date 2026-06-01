@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  node_service:
+    build:
+      context: .            # O Dockerfile está aqui na raiz
+      dockerfile: Dockerfile
+    container_name: node_service
+    restart: unless-stopped
+    expose:
+      - "3000"
+    volumes:
+      - ./app:/app          # Continua espelhando a pasta local ./app para dentro de /app no container
+      - /app/node_modules   # Preserva os módulos instalados no container
+    networks:
+      - jedieduca-network
+
+networks:
+  jedieduca-network:
+    external: true

@@ -1,17 +1,21 @@
-FROM node:20-alpine
+FROM node:lts
 
 WORKDIR /app
 
-# Copia os arquivos de dependências de dentro da pasta local 'app' para o WORKDIR atual (/app)
-COPY app/package*.json ./
+COPY package*.json ./
+ 
 
-# Instala as dependências de forma limpa
-RUN npm install --omit=dev
+# Instala ferramentas de build (evita 99% dos erros)
+#RUN apt-get update && apt-get install -y \
+#    python3 \
+#    make \
+#    g++ \
+#    && rm -rf /var/lib/apt/lists/*
 
-# Copia todo o restante do conteúdo da pasta local 'app' para o WORKDIR do container
-COPY app/ .
+RUN npm install
 
-# Porta padrão que sua aplicação Node escuta internamente
+COPY . .
+
 EXPOSE 3000
 
-CMD ["node", "server.js"]
+CMD ["npm", "start"]

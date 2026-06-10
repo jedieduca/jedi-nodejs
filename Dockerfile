@@ -2,7 +2,7 @@ FROM node:lts
 
 WORKDIR /app
 
-COPY package*.json ./
+COPY /app/package*.json ./
  
 
 # Instala ferramentas de build (evita 99% dos erros)

@@ -1,0 +1,31 @@
+graph TD
+    subgraph UI 'Camada de Apresentação'
+        App[App.tsx]
+        Components[Componentes React]
+        Styles[CSS / Layout]
+    end
+
+    subgraph Domínio 'Camada de Domínio'
+        PlayerManager[PlayerManager.ts]
+        PlayerClass[Player.ts]
+        Contexts[PlayersContext.tsx]
+        Hooks[Hooks de jogo]
+    end
+
+    subgraph Serviços 'Camada de Serviços'
+        ApiService[apiService.ts]
+        NewsService[newsService.ts]
+        LLMService[llmService.ts]
+        SpeechService[speechService.ts]
+    end
+
+    subgraph Integracoes 'Integrações Externas'
+        NewsAPI[(API de Notícias)]
+        RulesAPI[(API de Regras)]
+        LLMProviders[(OpenAI / Gemini / etc.)]
+        SpeechEngine[(Speech Synthesis)]
+    end
+
+    UI --> Domínio
+    Domínio --> Serviços
+    Serviços --> Integracoes

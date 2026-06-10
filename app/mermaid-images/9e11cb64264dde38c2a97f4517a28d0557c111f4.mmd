@@ -1,0 +1,17 @@
+graph TD
+    subgraph UI["Camada de Apresentação"]
+        A1[App.tsx<br><small>orquestrador principal</small>]
+        A2[Componentes React<br><small>IsometricBoard, Dice, CharacterSelection...</small>]
+        A3[CSS / Layout<br><small>Sprites, estilos e assets</small>]
+    end;
+
+    %% linha em branco antes da nota e ponto e vírgula após o end
+
+    A1 --> A2
+    A2 --> A3
+
+    N1["Máquina de estados\nuseReducer (FSM)"]:::note
+    A1 -.-> N1
+
+    %% --- ESTILOS ---
+    classDef note fill:#FFF7CC,stroke:#E6C200,color:#333,stroke-dasharray: 3 3;    

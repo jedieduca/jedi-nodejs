@@ -1,0 +1,21 @@
+{
+  "name": "jedi-nodejs",
+  "version": "1.0.0",
+  "description": "Módulo Node.js integrado ao ecossistema JEDi",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "keywords": [
+    "node",
+    "express",
+    "jedi"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}

@@ -1,0 +1,11 @@
+graph TD
+    subgraph E["Integrações Externas"]
+        E1[(API de Notícias)]
+        E2[(API de Regras)]
+        E3[(Provedores de IA)]
+        E4[(Speech Engine)]
+    end
+
+    E1 -->|JSON| E2
+    E2 -->|REST| E3
+    E3 -->|Texto explicativo| E4

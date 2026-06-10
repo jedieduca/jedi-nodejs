@@ -1,0 +1,26 @@
+sequenceDiagram
+    autonumber
+    participant J as Jogador
+    participant UI as Interface React
+    participant PC as PlayersContext / PlayerManager
+    participant News as Serviço de Notícias
+    participant Dice as Componente Dado
+
+    J->>UI: Seleciona personagens (UC02)
+    UI->>PC: addPlayers()
+    UI->>News: getNews()
+    News-->>UI: Lista de notícias
+    UI->>J: Exibe notícia e opções Fake/Não Fake
+    J->>UI: Avalia notícia (Resposta correta)
+    UI->>UI: dispatchGameEvent(AVALIACAO_CORRETA)
+    UI->>J: Narração celebra acerto (Tia Bel)
+    UI->>Dice: Habilita dado e chama setZoomToDice()
+    J->>Dice: Clica no dado
+    Dice->>UI: DADO_CLICADO
+    UI->>UI: dispatchGameEvent(DADO_CLICADO)
+    UI->>UI: startDiceAnimation() / AnimacaoDado
+    UI->>PC: setActivePlayerMoves(valorDoDado)
+    UI->>UI: AnimacaoZoomIn → AnimacaoCaminhada
+    UI->>PC: moveActivePlayerSteps()
+    PC-->>UI: Conclui movimento (CAMINHADA_ANIMACAO_FIM)
+    UI->>UI: AnimacaoZoomOut → AguardandoNoticia1

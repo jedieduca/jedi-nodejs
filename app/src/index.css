@@ -1,0 +1,79 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: #2c3e50;
+  overflow: hidden;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+* {
+  box-sizing: border-box;
+  user-select: none;
+}
+
+#root {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Adiciona suporte a transformações 3D em todos os navegadores */
+.isometric-board, .tile, .player, .dice, .dice-face {
+  -webkit-transform-style: preserve-3d;
+  -moz-transform-style: preserve-3d;
+  transform-style: preserve-3d;
+  -webkit-backface-visibility: hidden;
+  -moz-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+/* Nomes de classes semânticas */
+.game-container {
+  /* Container principal do jogo */
+}
+
+.isometric-board {
+  /* Tabuleiro isométrico */
+}
+
+.tile {
+  /* Bloco do tabuleiro */
+}
+
+.tile-fundo {
+  /* Tiles de fundo */
+}
+
+.tile-caminho {
+  /* Tiles de caminho */
+}
+
+.player {
+  /* Avatar do jogador */
+}
+
+.player-idle {
+  /* Jogador parado */
+}
+
+.player-walking {
+  /* Jogador em movimento */
+}
+
+.dice {
+  /* Container do dado */
+}
+
+.dice-face {
+  /* Face do dado */
+}

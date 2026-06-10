@@ -1,0 +1,10 @@
+{
+    "theme": "default",
+    "themeVariables": {
+      "primaryColor": "#1f77b4",
+      "edgeLabelBackground": "#ffffff",
+      "fontFamily": "Arial",
+      "fontSize": "14px"
+    }
+  }
+  

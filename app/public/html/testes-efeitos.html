@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Desmaterialização de Sprite</title>
+    <style>
+      :root {
+        color: #111;
+        background: #0b0e12;
+        font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+        line-height: 1.5;
+      }
+
+      body {
+        margin: 0;
+      }
+
+      main {
+        min-height: 100vh;
+        padding: 2.5rem clamp(1rem, 3vw, 3rem);
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+      }
+
+      h1 {
+        margin: 0;
+        color: #f0f7ff;
+        font-size: clamp(1.8rem, 3vw, 2.7rem);
+      }
+
+      .intro {
+        color: #c6d7f0;
+        max-width: 48rem;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 1.5rem;
+      }
+
+      .example {
+        background: #141821;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        padding: 1.25rem;
+        border-radius: 18px;
+        box-shadow: 0 25px 55px rgba(2, 5, 12, 0.7);
+        color: #f6f9ff;
+      }
+
+      .example h2 {
+        margin: 0 0 0.35rem;
+        font-size: 1.3rem;
+      }
+
+      .example p {
+        margin: 0 0 0.75rem;
+        color: #9bb1db;
+        font-size: 0.95rem;
+      }
+
+      .sprite-frame {
+        width: 100%;
+        height: 240px;
+        border-radius: 12px;
+        border: 1px dashed rgba(255, 255, 255, 0.35);
+        display: grid;
+        place-items: center;
+        background: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.12), transparent 55%),
+          radial-gradient(circle at 80% 40%, rgba(125, 204, 255, 0.2), transparent 45%),
+          #0b0e12;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .sprite-frame span {
+        font-size: 0.75rem;
+        position: absolute;
+        top: 0.5rem;
+        right: 0.75rem;
+        color: rgba(255, 255, 255, 0.65);
+        z-index: 4;
+      }
+
+      .sprite-frame img {
+        width: min(220px, 80%);
+        filter: drop-shadow(0 10px 25px rgba(0, 0, 0, 0.6));
+        transform-origin: center;
+        position: relative;
+        z-index: 2;
+      }
+
+      .sprite-frame.fade:hover img {
+        animation: fade-out 10s ease forwards;
+      }
+
+      .sprite-frame.fade-scale:hover img {
+        animation: fade-and-scale 10s ease forwards;
+      }
+
+      .sprite-frame.magic-dust::before,
+      .sprite-frame.magic-dust::after,
+      .sprite-frame.magic-runes::before,
+      .sprite-frame.magic-runes::after {
+        content: "";
+        position: absolute;
+        pointer-events: none;
+        opacity: 0;
+      }
+
+      .sprite-frame.magic-dust::before {
+        inset: 16% 18%;
+        background: radial-gradient(circle, rgba(205, 143, 255, 0.75) 0%, rgba(95, 203, 255, 0.45) 45%, transparent 72%);
+        filter: blur(10px);
+        transform: scale(0.35);
+        z-index: 1;
+      }
+
+      .sprite-frame.magic-dust::after {
+        inset: 18% 24%;
+        background:
+          radial-gradient(circle, rgba(255, 255, 255, 0.98) 0 8%, transparent 10%) 15% 78% / 34px 34px no-repeat,
+          radial-gradient(circle, rgba(199, 238, 255, 0.9) 0 10%, transparent 12%) 75% 70% / 40px 40px no-repeat,
+          radial-gradient(circle, rgba(196, 159, 255, 0.9) 0 9%, transparent 11%) 62% 86% / 30px 30px no-repeat,
+          radial-gradient(circle, rgba(150, 215, 255, 0.95) 0 8%, transparent 10%) 36% 62% / 26px 26px no-repeat,
+          radial-gradient(circle, rgba(255, 255, 255, 0.95) 0 8%, transparent 10%) 52% 82% / 24px 24px no-repeat;
+        mix-blend-mode: screen;
+        transform: translateY(26px) scale(0.75);
+        z-index: 3;
+      }
+
+      .sprite-frame.magic-dust:hover img {
+        animation: arcane-vanish 10s ease forwards;
+      }
+
+      .sprite-frame.magic-dust:hover::before {
+        animation: arcane-burst 10s ease forwards;
+      }
+
+      .sprite-frame.magic-dust:hover::after {
+        animation: sparkles-rise 10s ease forwards;
+      }
+
+      .sprite-frame.magic-runes::before {
+        width: 210px;
+        height: 210px;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%) scale(0.45) rotate(0deg);
+        border-radius: 50%;
+        background: repeating-conic-gradient(
+          from 0deg,
+          rgba(160, 238, 255, 0.88) 0deg 10deg,
+          rgba(160, 238, 255, 0.08) 10deg 28deg
+        );
+        filter: blur(1.2px);
+        mix-blend-mode: screen;
+        z-index: 1;
+      }
+
+      .sprite-frame.magic-runes::after {
+        inset: 8% 36%;
+        background: linear-gradient(
+          to top,
+          rgba(143, 221, 255, 0) 0%,
+          rgba(143, 221, 255, 0.86) 35%,
+          rgba(238, 252, 255, 0.94) 54%,
+          rgba(143, 221, 255, 0) 100%
+        );
+        filter: blur(7px);
+        transform: scaleY(0.12);
+        z-index: 3;
+      }
+
+      .sprite-frame.magic-runes:hover img {
+        animation: astral-vanish 2s ease forwards;
+      }
+
+      .sprite-frame.magic-runes:hover::before {
+        animation: rune-ring 2s linear forwards;
+      }
+
+      .sprite-frame.magic-runes:hover::after {
+        animation: beam-pulse 2s ease forwards;
+      }
+
+      @keyframes fade-out {
+        from {
+          opacity: 1;
+        }
+        to {
+          opacity: 0;
+        }
+      }
+
+      @keyframes fade-and-scale {
+        from {
+          opacity: 1;
+          transform: scale(1);
+        }
+        to {
+          opacity: 0;
+          transform: scale(0.45);
+        }
+      }
+
+      @keyframes arcane-vanish {
+        0% {
+          opacity: 1;
+          transform: scale(1);
+          filter: drop-shadow(0 10px 25px rgba(0, 0, 0, 0.6)) brightness(1) saturate(1);
+        }
+        35% {
+          opacity: 1;
+          filter: drop-shadow(0 0 24px rgba(197, 140, 255, 0.9)) brightness(1.28) saturate(1.7);
+        }
+        100% {
+          opacity: 0;
+          transform: scale(0.86) translateY(-9px);
+          filter: blur(7px) brightness(1.9) saturate(2.1);
+        }
+      }
+
+      @keyframes arcane-burst {
+        0% {
+          opacity: 0;
+          transform: scale(0.25);
+        }
+        25% {
+          opacity: 0.95;
+        }
+        100% {
+          opacity: 0;
+          transform: scale(1.35);
+        }
+      }
+
+      @keyframes sparkles-rise {
+        0% {
+          opacity: 0;
+          transform: translateY(26px) scale(0.75);
+        }
+        30% {
+          opacity: 0.95;
+        }
+        100% {
+          opacity: 0;
+          transform: translateY(-30px) scale(1.15);
+        }
+      }
+
+      @keyframes astral-vanish {
+        0% {
+          opacity: 1;
+          transform: scale(1) translateY(0);
+          filter: drop-shadow(0 10px 25px rgba(0, 0, 0, 0.6)) brightness(1);
+        }
+        30% {
+          opacity: 1;
+          filter: drop-shadow(0 0 28px rgba(131, 235, 255, 0.95)) brightness(1.38) saturate(1.6) hue-rotate(22deg);
+        }
+        100% {
+          opacity: 0;
+          transform: scale(0.62) translateY(-24px);
+          filter: blur(8px) saturate(2) brightness(1.45) hue-rotate(48deg);
+        }
+      }
+
+      @keyframes rune-ring {
+        0% {
+          opacity: 0;
+          transform: translate(-50%, -50%) scale(0.45) rotate(0deg);
+        }
+        18% {
+          opacity: 0.9;
+        }
+        100% {
+          opacity: 0;
+          transform: translate(-50%, -50%) scale(1.28) rotate(310deg);
+        }
+      }
+
+      @keyframes beam-pulse {
+        0% {
+          opacity: 0;
+          transform: scaleY(0.12);
+        }
+        30% {
+          opacity: 0.92;
+        }
+        100% {
+          opacity: 0;
+          transform: scaleY(1.3);
+        }
+      }
+
+      .tip {
+        font-size: 0.85rem;
+        color: #98c3ff;
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>Desmaterialização de sprites</h1>
+        <p class="intro">
+          Cada quadro abaixo usa apenas CSS para simular o desaparecimento do sprite em 2 segundos. Passe o mouse
+          sobre o quadro para executar a animação que desmaterializa o GIF fornecido.
+        </p>
+      </header>
+
+      <div class="grid">
+        <article class="example">
+          <h2>Opção 1 — Fade puro</h2>
+          <p>
+            A animação reduz apenas a opacidade. Ao manter <code>animation-fill-mode</code> implícito pelo hover,
+            o sprite some aos poucos durante os 2 segundos.
+          </p>
+          <div class="sprite-frame fade">
+            <span>hover para animar</span>
+            <img src="http://app.jedieduca.com.br/macaco-olhando.gif" alt="Sprite do macaco olhando" />
+          </div>
+          <p class="tip">A animação é acionada ao passar o mouse e volta ao estado original ao retirar o hover.</p>
+        </article>
+
+        <article class="example">
+          <h2>Opção 2 — Fade + encolher</h2>
+          <p>
+            Combina queda de opacidade com escala para simular o sprite "encolhendo" enquanto desaparece. O
+            transform é interpolado ao longo de 2 segundos.
+          </p>
+          <div class="sprite-frame fade-scale">
+            <span>hover para animar</span>
+            <img src="http://app.jedieduca.com.br/macaco-olhando.gif" alt="Sprite do macaco olhando" />
+          </div>
+          <p class="tip">Recomendo manter o cursor sobre o quadro até o fim para ver o desaparecimento completo.</p>
+        </article>
+
+        <article class="example">
+          <h2>Opção 3 — Poeira mágica</h2>
+          <p>
+            Adiciona brilho arcano e pequenas faíscas subindo enquanto o sprite some. O efeito combina opacidade,
+            blur, saturação e camadas com gradientes radiais.
+          </p>
+          <div class="sprite-frame magic-dust">
+            <span>hover para animar</span>
+            <img src="http://app.jedieduca.com.br/macaco-olhando.gif" alt="Sprite do macaco olhando" />
+          </div>
+          <p class="tip">Visualmente lembra um encanto de dissipação com "pó estelar".</p>
+        </article>
+
+        <article class="example">
+          <h2>Opção 4 — Círculo rúnico + feixe</h2>
+          <p>
+            Simula um portal encantado: um círculo giratório aparece ao fundo e um feixe de luz sobe enquanto o
+            sprite desmaterializa.
+          </p>
+          <div class="sprite-frame magic-runes">
+            <span>hover para animar</span>
+            <img src="http://app.jedieduca.com.br/macaco-olhando.gif" alt="Sprite do macaco olhando" />
+          </div>
+          <p class="tip">Boa opção para teleporte ou magia de invocação.</p>
+        </article>
+      </div>
+    </main>
+  </body>
+</html>

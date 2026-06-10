@@ -1,0 +1,170 @@
+.register-screen-container {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: radial-gradient(circle at top, rgba(191, 233, 236, 0.2), transparent 60%), var(--jedi-background);
+  font-family: 'Arial', sans-serif;
+}
+
+.register-screen-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.register-screen-card {
+  position: relative;
+  width: min(560px, 94vw);
+  background: rgba(22, 22, 22, 0.95);
+  border: 1px solid rgba(196, 222, 29, 0.35);
+  border-radius: 18px;
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+}
+
+.register-screen-header {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 24px 24px 12px;
+  color: #ffffff;
+  text-align: center;
+}
+
+.register-screen-back-button {
+  position: absolute;
+  left: 18px;
+  top: 18px;
+  border: 1px solid rgba(196, 222, 29, 0.5);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--jedi-green);
+  padding: 6px 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.register-screen-logo-wrapper {
+  width: 76px;
+  height: 76px;
+  border-radius: 999px;
+  background: rgba(196, 222, 29, 0.15);
+  border: 1px solid rgba(196, 222, 29, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.register-screen-logo {
+  width: 62px;
+  height: 62px;
+  object-fit: contain;
+}
+
+.register-screen-header h1 {
+  margin: 0;
+  font-size: 1.8rem;
+  color: var(--jedi-main-title);
+}
+
+.register-screen-header p {
+  margin: 0;
+  opacity: 0.86;
+}
+
+.register-screen-form {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  padding: 10px 24px 24px;
+}
+
+.register-screen-form label {
+  font-size: 0.9rem;
+  color: #d6e0e8;
+}
+
+.register-screen-form input {
+  width: 100%;
+  border: 1px solid rgba(196, 222, 29, 0.28);
+  background: #111;
+  color: #fff;
+  border-radius: 12px;
+  padding: 11px 14px;
+  outline: none;
+}
+
+.register-screen-form input:focus {
+  border-color: var(--jedi-green);
+  box-shadow: 0 0 0 2px rgba(196, 222, 29, 0.18);
+}
+
+.register-screen-error {
+  background: rgba(255, 95, 95, 0.16);
+  border: 1px solid rgba(255, 95, 95, 0.4);
+  color: #ffd7d7;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 0.9rem;
+  margin-top: 2px;
+}
+
+.register-screen-submit {
+  margin-top: 10px;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 16px;
+  background: var(--jedi-green);
+  color: #20240a;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.register-screen-submit:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.register-screen-footer {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 0.9rem;
+  color: #d6e0e8;
+}
+
+.register-screen-link {
+  border: none;
+  background: transparent;
+  color: var(--jedi-green);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+@media (min-width: 800px) {
+  .register-screen-form {
+    grid-template-columns: 1fr 1fr;
+    column-gap: 12px;
+  }
+
+  .register-screen-form label[for="register-name"],
+  .register-screen-form input#register-name,
+  .register-screen-form label[for="register-email"],
+  .register-screen-form input#register-email,
+  .register-screen-form label[for="register-date"],
+  .register-screen-form input#register-date,
+  .register-screen-error,
+  .register-screen-submit,
+  .register-screen-footer {
+    grid-column: 1 / -1;
+  }
+}

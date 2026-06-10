@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Painel de Vitória - Prévia</title>
+  <style>
+    :root {
+      --jedi-violet: #6929fc;
+      --jedi-blue: #5cc6d0;
+      --jedi-green:  #c4de1d;
+      --jedi-pink: #ec62ff;
+      --jedi-dark-green: #647e0d;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+    }
+
+    body {
+      background-color: #00FF00; /* fundo uniforme verde */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      overflow: hidden;
+    }
+
+    /* === PAINEL DE VITÓRIA/CONCLUSÃO (cópia do jogo) === */
+    .victory-panel {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 65dvw;
+      height: 65dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      pointer-events: auto;
+      will-change: transform, opacity;
+      z-index: 1200;
+    }
+
+    .victory-panel-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      /* background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); */
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 30px;
+      padding: 40px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      border: 5px solid rgba(255, 255, 255, 0.3);
+      animation: victorySlideIn 0.8s ease-out;
+      width: 100%;
+      height: 100%;
+      z-index: 9001;
+    }
+
+    .victory-image-container {
+      margin-bottom: 20px;
+      animation: victoryImageBounce 1s ease-in-out infinite alternate;
+    }
+
+    .victory-image {
+      width: 300px;
+      height: auto;
+      filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.3));
+      display: block;
+    }
+
+    .victory-title {
+      font-size: 4rem;
+      font-weight: bold;
+      color: var(--jedi-violet);
+      text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
+      margin: 20px 0;
+      animation: victoryTitlePulse 1.5s ease-in-out infinite;
+    }
+
+    .restart-button {
+      margin-top: 30px;
+      padding: 20px 60px;
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: #fff;
+      background: linear-gradient(135deg, var(--jedi-green) 0%, var(--jedi-dark-green) 100%);
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    .restart-button:hover {
+      transform: scale(1.1);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    .restart-button:active {
+      transform: scale(0.95);
+    }
+
+    /* Animações do painel de vitória */
+    @keyframes victorySlideIn {
+      0% {
+        opacity: 0;
+        transform: scale(0.5);
+      }
+      50% {
+        transform: scale(1.05);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @keyframes victoryImageBounce {
+      0% {
+        transform: translateY(0px);
+      }
+      100% {
+        transform: translateY(-10px);
+      }
+    }
+
+    @keyframes victoryTitlePulse {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.05);
+      }
+    }
+
+    /* Responsividade do painel de vitória (cópia do App.css) */
+    @media screen and (max-width: 1024px) {
+      .victory-panel {
+        width: 90dvw;
+        height: 80dvh;
+      }
+
+      .victory-image {
+        width: 200px;
+      }
+
+      .victory-title {
+        font-size: 3rem;
+      }
+
+      .restart-button {
+        padding: 15px 40px;
+        font-size: 1.4rem;
+      }
+    }
+
+    @media screen and (max-width: 768px) {
+      .victory-panel {
+        width: 95dvw;
+        height: 85dvh;
+      }
+
+      .victory-image {
+        width: 150px;
+      }
+
+      .victory-title {
+        font-size: 2.5rem;
+      }
+
+      .restart-button {
+        padding: 12px 30px;
+        font-size: 1.2rem;
+      }
+    }
+
+    @media screen and (max-width: 480px) {
+      .victory-panel {
+        width: 100dvw;
+        height: 90dvh;
+      }
+
+      .victory-panel-content {
+        padding: 20px;
+      }
+
+      .victory-image {
+        width: 120px;
+      }
+
+      .victory-title {
+        font-size: 2rem;
+      }
+
+      .restart-button {
+        padding: 10px 25px;
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Estrutura copiada de src/App.tsx -->
+  <div class="victory-panel">
+    <div class="victory-panel-content">
+      <div class="victory-image-container">
+        <!-- Importante: usa a cópia local do PNG nesta pasta -->
+        <img
+          src="./tiabel-trofeu-1024.png"
+          alt="tIA Bel com troféu"
+          class="victory-image"
+        />
+      </div>
+      <h1 class="victory-title">Parabéns!!!</h1>
+      <button class="restart-button">
+        🔄 Reiniciar
+      </button>
+    </div>
+  </div>
+</body>
+</html>

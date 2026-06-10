@@ -1,0 +1,22 @@
+sequenceDiagram
+    autonumber
+    participant J as Jogador
+    participant UI as Interface React
+    participant News as Serviço de Notícias
+    participant Rules as Serviço de Regras
+    participant LLM as Serviço de IA (LLM)
+    participant Speech as Serviço de Narração
+
+    J->>UI: Avalia notícia (Resposta incorreta)
+    UI->>UI: dispatchGameEvent(AVALIACAO_INCORRETA)
+    UI->>Rules: getRegra(idRegra)
+    Rules-->>UI: Dados estruturados da regra
+    UI->>LLM: generateResponse(systemMessage, userMessage)
+    LLM-->>UI: Texto explicativo adaptado
+    UI->>Speech: speak(explanationText)
+    UI->>J: Exibe painel de explicação + selo Fake/Not Fake
+    J->>UI: Fecha painel
+    UI->>UI: dispatchGameEvent(FECHAR_EXPLICACAO)
+    UI->>UI: shouldSelectNextNews = true
+    UI->>UI: nextTurn() (PlayerManager)
+    UI->>News: Seleciona próxima notícia

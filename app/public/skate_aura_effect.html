@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Skate com Aura Azul</title>
+  <style>
+    body {
+      background-color: #777777;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .skate-container {
+      position: relative;
+      display: inline-block;
+      filter: drop-shadow(0 0 25px rgba(0, 174, 255, 0.50)); /* aura principal */
+      animation: pulsar 2.5s ease-in-out infinite;
+    }
+
+    @keyframes pulsar {
+      0%, 100% {
+        filter: drop-shadow(0 0 25px rgba(0, 174, 255, 0.50));
+      }
+      50% {
+        filter: drop-shadow(0 0 45px rgba(0, 174, 255, 0.8));
+      }
+    }
+
+    img {
+      width: 320px;
+      height: auto;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="skate-container">
+    <img src="skate-mag.png" alt="Skate Isométrico com Aura Azul">
+  </div>
+</body>
+</html>

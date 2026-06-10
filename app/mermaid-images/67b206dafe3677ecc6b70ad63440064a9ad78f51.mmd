@@ -1,0 +1,11 @@
+graph TD
+    subgraph D["Camada de Domínio"]
+        D1[PlayerManager.ts<br><small>Gerencia turnos e movimentos</small>]
+        D2[Player.ts<br><small>Lógica de personagem e movimentação</small>]
+        D3[PlayersContext.tsx<br><small>Estado global dos jogadores</small>]
+        D4[Hooks de jogo<br><small>useNews, useDynamicZoom, usePerfDiagnostics</small>]
+    end
+
+    D1 --> D2
+    D1 --> D3
+    D3 --> D4

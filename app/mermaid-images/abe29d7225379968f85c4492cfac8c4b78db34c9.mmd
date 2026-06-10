@@ -1,0 +1,71 @@
+
+graph TD
+    %% ====== Atores ======
+    J[JOGADOR]
+    TB[TIA BEL]
+    SN[(Serviço de Notícias)]
+    SR[(Serviço de Regras)]
+    LLM[(Serviço de IA Generativa)]
+    VOZ[(Motor de Voz)]
+    PROF[(Professor / Moderador)]
+
+    %% ====== Sistema ======
+    subgraph SISTEMA["Sistema JEDi Educa"]
+        UC01([UC01 Iniciar Aplicação])
+        UC02([UC02 Selecionar Personagens])
+        UC03([UC03 Iniciar Partida])
+        UC04([UC04 Carregar Notícia])
+        UC05([UC05 Avaliar Notícia])
+        UC06([UC06 Lançar Dado])
+        UC07([UC07 Receber Explicação de Erro])
+        UC08([UC08 Mover Jogador no Tabuleiro])
+        UC09([UC09 Alternar Turno])
+        UC10([UC10 Concluir Partida])
+        UC11([UC11 Ajustar Tela e Controles])
+        UC12([UC12 Configurar Modelo de IA])
+        UC13([UC13 Acompanhar Status de Jogadores])
+        UC14([UC14 Registrar e Interpretar Desempenho])
+    end
+
+    %% ====== Relações principais com Jogador ======
+    J --> UC01
+    J --> UC02
+    J --> UC03
+    J --> UC05
+    J --> UC06
+    J --> UC08
+    J --> UC10
+    J --> UC11
+    J --> UC13
+
+    %% ====== Relações com Professor / Moderador ======
+    PROF --> UC12
+    PROF --> UC14
+
+    %% ====== Interações automáticas / serviços ======
+    SN -. fornece notícias .-> UC04
+    SR -. fornece explicações .-> UC07
+    LLM -. gera feedback narrativo .-> UC07
+    VOZ -. sintetiza áudio .-> UC07
+
+    %% ====== Relações de dependência internas ======
+    UC01 --> UC02
+    UC02 --> UC03
+    UC03 --> UC04
+    UC04 --> UC05
+    UC05 --> UC06
+    UC05 --> UC07
+    UC06 --> UC08
+    UC08 --> UC09
+    UC09 --> UC04
+    UC08 --> UC10
+
+    %% ====== Notas visuais ======
+    classDef externo fill:#E8F4FF,stroke:#3A87C6,color:#1E3D66,stroke-width:1px;
+    class SN,SR,LLM,VOZ externo;
+
+    classDef ator fill:#FDEDEC,stroke:#C0392B,color:#641E16,stroke-width:1px;
+    class J,TB,PROF ator;
+
+    classDef sistema fill:#FDFEFE,stroke:#7B7D7D,color:#1B2631,stroke-width:1px;
+    class UC01,UC02,UC03,UC04,UC05,UC06,UC07,UC08,UC09,UC10,UC11,UC12,UC13,UC14 sistema;

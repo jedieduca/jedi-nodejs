@@ -1,0 +1,406 @@
+/* === PLAYER COM VISIBILIDADE CONTÍNUA (correção do desaparecimento) === */
+.player {
+  position: absolute;
+  width: 128px; /* Aumentado de 128px para 160px */
+  height: 128px; /* Aumentado de 128px para 160px */
+  pointer-events: none;
+  overflow: visible;
+  
+  /* === PROTEÇÕES CONTRA DESAPARECIMENTO === */
+  /* Garantir que o player permaneça sempre visível (exceto durante animações especiais) */
+  opacity: 1;
+  visibility: visible;
+  display: block !important;
+  
+  /* Evitar problemas de z-index - valor mínimo garantido */
+  z-index: 1000;
+  
+  /* === OTIMIZAÇÕES DE RENDERIZAÇÃO === */
+  /* Melhorar performance e evitar flickering */
+  backface-visibility: hidden;
+  image-rendering: pixelated;
+  user-select: none;
+  
+  /* === PROTEÇÕES CONTRA PROBLEMAS DE LAYOUT === */
+  /* Evitar que transformações CSS causem desaparecimento */
+  /* contain: layout style paint; */ /* REMOVIDO: impede overflow do conteúdo escalado */
+  will-change: transform, left, top;
+  
+  /* 
+    NOTA: Transições e transform são controlados dinamicamente via JavaScript
+    para permitir animação suave customizada durante movimento
+  */
+}
+
+/* === EXCEÇÃO: Permitir animações do Portal de Desmaterialização no container === */
+.player.portal-dematerializing,
+.player.portal-rematerializing {
+  /* Permitir que pseudo-elementos e animações controlem a aparência */
+  opacity: unset;
+  visibility: unset;
+}
+
+/* Indicador de jogador ativo */
+.player.active-player::after {
+  content: "";
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 32px;
+  height: 32px;
+  background: radial-gradient(circle, rgba(76,175,80,0.6) 0%, rgba(76,175,80,0) 70%);
+  border-radius: 50%;
+  animation: pulse-active 1.5s infinite alternate;
+}
+
+.player-active-indicator {
+  position: absolute;
+  top: 0px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 12px;
+  height: 12px;
+  background-color: rgba(76, 175, 80, 0.8);
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 0 10px rgba(76, 175, 80, 0.8);
+  animation: pulse-indicator 1.5s infinite alternate;
+  z-index: 1001;
+  opacity: 0.5;
+}
+
+.player-sprite {
+  width: 100%;
+  height: 100%;
+  background-repeat: no-repeat;
+  background-size: 100% 100%; /* Reduzir sprites 512x512 para caber no container 128x128 */
+  background-position: center;
+  
+  /* === PROTEÇÕES CONTRA DESAPARECIMENTO DO SPRITE === */
+  /* NOTA: opacity e visibility são controlados por padrão, mas podem ser sobrescritos
+     por animações específicas (ex: portal de desmaterialização) */
+  opacity: 1;
+  visibility: visible;
+  display: block !important;
+  
+  /* === OTIMIZAÇÕES DE RENDERIZAÇÃO === */
+  transform: translateZ(0); /* Combinar scale com GPU acceleration */
+  backface-visibility: hidden;
+  image-rendering: pixelated;
+  
+  /* === PROTEÇÕES CONTRA PROBLEMAS DE LAYOUT === */
+  /* Evitar que mudanças de background causem flickering */
+  /* contain: layout style paint; */ /* REMOVIDO: impede overflow do conteúdo escalado */
+  will-change: background-image;
+}
+
+/* === EXCEÇÃO: Animações do Portal de Desmaterialização === */
+/* Permitir que as animações controlem opacity e outros atributos */
+.player.portal-dematerializing .player-sprite,
+.player.portal-rematerializing .player-sprite {
+  /* Remover proteções que impedem a animação */
+  opacity: unset;
+  visibility: unset;
+}
+
+/* === AJUSTE ESPECÍFICO PARA SPRITES POR PERSONAGEM === */
+/* Configuração centralizada está em src/utils/spriteSystem.ts -> CHARACTER_SPRITE_CONFIG */
+
+.character-negra .player-sprite,
+.character-maria .player-sprite,
+.character-caio .player-sprite,
+.character-tiabel .player-sprite,
+.character-tiabel_victory .player-sprite,
+.character-tiabel36 .player-sprite,
+.character-thiago .player-sprite,
+.character-joao .player-sprite,
+.character-julia .player-sprite,
+.character-larissa .player-sprite {
+  /* Sprites negra/maria/caio/tiabel/tiabel_victory/tiabel36: 512x512px -> 50% para caber no container 128x128 */
+  background-size: contain !important;
+  background-position: center !important;
+}
+
+/* Aumenta o sprite da Tiabel (parada e animada) em 1.5x, sem mexer no container .player */
+.character-tiabel .player-sprite,
+.character-tiabel_victory .player-sprite {
+  transform: translateZ(0) scale(1.3);
+  transform-origin: center bottom; /* Ajuste fino: mantém os pés próximos ao tile */
+}
+.character-tiabel36 .player-sprite {
+  transform: translateZ(0) scale(1.6);
+  transform-origin: center bottom; /* Ajuste fino: mantém os pés próximos ao tile */
+}
+
+
+/* Container específico da Tiabel - NÃO escalar aqui pois já escalamos o sprite */
+.tiabel-container {
+  overflow: visible !important;
+  isolation: isolate; /* Cria novo contexto de empilhamento */
+  contain: none; /* Remove qualquer contenção que possa interferir */
+}
+
+/* Aplicar overflow visible especificamente no .player dentro do .tiabel-container */
+.tiabel-container .player {
+  overflow: visible !important;
+  contain: none !important; /* Remove contenção que impede overflow */
+}
+
+.character-ana .player-sprite {
+  /* Sprites ana: 256x256px -> 50% para caber no container 128x128 com scale(2) */
+  background-size: contain !important;
+  background-position: center !important;
+}
+
+/*
+.player::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  /* box-shadow: 0 0 15px 5px rgba(255, 235, 59, 0.6); * /
+  border-radius: 50%;
+  /* animation: pulse-glow 1.5s infinite alternate; * /
+}
+
+.player::before {
+  content: "";
+  position: absolute;
+  bottom: -1.5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 24px;
+  height: 10px;
+  background: radial-gradient(ellipse at center, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0) 70%);
+  border-radius: 50%;
+}
+*/
+
+.player-debug {
+  position: absolute;
+  top: -25px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: bold;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 1000;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+}
+
+/* Direções do jogador */
+
+/* sprites do player * /
+.player-down .player-sprite {
+  background-image: url('/assets/sprites/player0.png');
+}
+
+.player-left .player-sprite {
+  background-image: url('/assets/sprites/player1.png');
+}
+
+.player-right .player-sprite {
+  background-image: url('/assets/sprites/player2.png');
+}
+
+.player-up .player-sprite {
+  background-image: url('/assets/sprites/player3.png');
+}
+*/
+
+/*
+.player-left-0 .player-sprite,
+.player-up-0 .player-sprite  {
+  background-image: url('/assets/sprites/laranjinha/Laranjinha_back_0.png');
+}
+
+.player-left-1 .player-sprite,
+.player-up-1 .player-sprite  {
+  background-image: url('/assets/sprites/laranjinha/Laranjinha_back_1.png');
+}
+
+.player-left-2 .player-sprite,
+.player-up-2 .player-sprite  {
+  background-image: url('/assets/sprites/laranjinha/Laranjinha_back_2.png');
+} 
+
+.player-left-3 .player-sprite,
+.player-up-3 .player-sprite  {
+  background-image: url('/assets/sprites/laranjinha/Laranjinha_back_3.png');
+}
+
+.player-left-4 .player-sprite,
+.player-up-4 .player-sprite  {
+  background-image: url('/assets/sprites/laranjinha/Laranjinha_back_4.png');
+} 
+
+.player-left-5 .player-sprite,
+.player-up-5 .player-sprite  {
+  background-image: url('/assets/sprites/laranjinha/Laranjinha_back_5.png');
+}
+
+.player-right-0 .player-sprite,
+.player-down-0 .player-sprite  {
+  background-image: url('/assets/sprites/laranjinha/Laranjinha_0.png');
+}
+
+.player-right-1 .player-sprite,
+.player-down-1 .player-sprite  {
+  background-image: url('/assets/sprites/laranjinha/Laranjinha_1.png');
+}
+
+.player-right-2 .player-sprite,
+.player-down-2 .player-sprite  {
+  background-image: url('/assets/sprites/laranjinha/Laranjinha_2.png');
+}
+
+.player-right-3 .player-sprite,
+.player-down-3 .player-sprite  {
+  background-image: url('/assets/sprites/laranjinha/Laranjinha_3.png');
+} 
+
+.player-right-4 .player-sprite,
+.player-down-4 .player-sprite  {
+  background-image: url('/assets/sprites/laranjinha/Laranjinha_4.png');
+}
+
+.player-right-5 .player-sprite,
+.player-down-5 .player-sprite  {
+  background-image: url('/assets/sprites/laranjinha/Laranjinha_5.png');
+} 
+
+*/
+
+/* === SISTEMA ORTOGONAL DE SPRITES USANDO CSS DINÂMICO === */
+
+/* 
+  NOTA IMPORTANTE: Este sistema é complementado por JavaScript que gera
+  dinamicamente as regras CSS para cada personagem, direção e frame.
+  
+  O formato da URL é construído em JavaScript seguindo o padrão:
+  '/assets/sprites/<personagem>/<personagem>_<pasta_da_direcao>_<indice_frame_formatado>.png'
+  
+  As regras CSS específicas são inseridas dinamicamente no <style> tag
+  para manter a ortogonalidade sem repetição de código.
+*/
+
+/* === CSS DINÂMICO SERÁ INSERIDO AQUI ===
+ * As regras CSS específicas são geradas automaticamente pelo sistema ortogonal
+ * e inseridas via JavaScript no formato:
+ * .character-<personagem>.player-<direção>-<frame> .player-sprite { background-image: url(...); }
+ */
+
+/* === ANIMAÇÕES === */
+/* Animações desabilitadas para evitar conflitos com animação customizada */
+/* As animações de movimento são controladas via JavaScript para melhor performance */
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes idle {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-1px);
+  }
+}
+
+@keyframes pulse-glow {
+  0% {
+    opacity: 0.4;
+    box-shadow: 0 0 5px 2px rgba(255, 235, 59, 0.4);
+  }
+  100% {
+    opacity: 0.8;
+    box-shadow: 0 0 20px 10px rgba(255, 235, 59, 0.8);
+  }
+} 
+
+@keyframes pulse-active {
+  0% {
+    opacity: 0.3;
+    transform: translateX(-50%) scale(0.8);
+  }
+  100% {
+    opacity: 0.7;
+    transform: translateX(-50%) scale(1.2);
+  }
+}
+
+@keyframes pulse-indicator {
+  0% {
+    box-shadow: 0 0 5px rgba(76, 175, 80, 0.6);
+    transform: translateX(-50%) scale(0.95);
+  }
+  100% {
+    box-shadow: 0 0 12px rgba(76, 175, 80, 0.8);
+    transform: translateX(-50%) scale(1.05);
+  }
+}
+
+/*
+Aplicar scala=2 no  sprite do player em mobile e scala=3 no sprite do player em tablet
+*/
+
+/* Media queries removidas - tamanho do sprite agora é consistente */
+/* O scale(2) no .player-sprite já proporciona o tamanho adequado */
+
+/* === ANIMAÇÃO SIMPLES DE SALTO PARA TIABEL === */
+/* @keyframes tiabel-celebration {
+  0%, 20% {
+    transform: translateY(0px);
+  }
+  10% {
+    transform: translateY(-20px);
+  }
+  20%, 40% {
+    transform: translateY(0px);
+  }
+  30% {
+    transform: translateY(-20px);
+  }
+  40%, 60% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+  60%, 80% {
+    transform: translateY(0px);
+  }
+  70% {
+    transform: translateY(-20px);
+  }
+  80%, 100% {
+    transform: translateY(0px);
+  }
+  90% {
+    transform: translateY(-20px);
+  }
+} */
+
+@keyframes tiabel-celebration {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+}
+
+/* Classe para aplicar a celebração completa */
+.tiabel-celebrating {
+  animation: tiabel-celebration 5s ease-in-out;
+}

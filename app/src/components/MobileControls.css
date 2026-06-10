@@ -1,0 +1,140 @@
+.mobile-controls {
+  position: fixed;
+  bottom: 20px;
+  left: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 2000;
+  pointer-events: none;
+}
+
+.directional-pad {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+  pointer-events: none;
+}
+
+.middle-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.control-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  margin: 5px;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.6);
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  pointer-events: auto;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.control-button:active {
+  transform: scale(0.95);
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+.control-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.center-button {
+  width: 40px;
+  height: 40px;
+  margin: 5px;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+}
+
+.arrow-icon {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.action-button-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.action-button {
+  padding: 12px 24px;
+  border-radius: 30px;
+  background-color: rgba(255, 193, 7, 0.9);
+  border: none;
+  color: black;
+  font-weight: bold;
+  font-size: 18px;
+  cursor: pointer;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease;
+  pointer-events: auto;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.action-button:active {
+  transform: translateY(2px);
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.action-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Responsividade para dispositivos menores */
+@media (max-width: 480px) {
+  .control-button {
+    width: 50px;
+    height: 50px;
+    font-size: 18px;
+  }
+  
+  .center-button {
+    width: 30px;
+    height: 30px;
+  }
+  
+  .action-button {
+    padding: 10px 20px;
+    font-size: 16px;
+  }
+}
+
+/* Melhor visibilidade em modo landscape */
+@media (max-height: 500px) and (orientation: landscape) {
+  .mobile-controls {
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 0 20px;
+  }
+  
+  .directional-pad {
+    margin-bottom: 0;
+  }
+  
+  .control-button {
+    width: 45px;
+    height: 45px;
+    margin: 3px;
+  }
+} 

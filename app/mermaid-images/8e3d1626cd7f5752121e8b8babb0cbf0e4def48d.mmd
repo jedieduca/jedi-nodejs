@@ -1,0 +1,19 @@
+graph TD
+    subgraph S["Camada de Serviços"]
+        S1[apiService.ts<br><small>Chamadas HTTP genéricas</small>]
+        S2[newsService.ts<br><small>Busca e normaliza notícias</small>]
+        S3[llmService.ts<br><small>Integra modelos de IA</small>]
+        S4[speechService.ts<br><small>Narração via Web Speech API</small>]
+    end;
+
+    %% linha em branco antes da nota e ponto e vírgula após o end
+
+    S1 --> S2
+    S1 --> S3
+    S1 --> S4
+
+    N3["Integração com LLMs\nOpenAI / Gemini / Anthropic"]:::note
+    S3 -.-> N3
+
+    %% --- ESTILOS ---
+    classDef note fill:#E8F4FF,stroke:#2B7ABD,color:#163D66,stroke-dasharray: 3 3;

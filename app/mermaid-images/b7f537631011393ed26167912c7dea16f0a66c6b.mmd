@@ -1,0 +1,17 @@
+stateDiagram-v2
+    [*] --> AguardandoSelecao
+    AguardandoSelecao --> AguardandoNoticia1: INICIAR_JOGO
+    AguardandoNoticia1 --> AvaliacaoNoticia: NEWS_TIMEOUT
+    AvaliacaoNoticia --> LancamentoDado: AVALIACAO_CORRETA
+    AvaliacaoNoticia --> FecharExplicacao: AVALIACAO_INCORRETA
+    FecharExplicacao --> AguardandoNoticia1: FECHAR_EXPLICACAO
+    LancamentoDado --> AnimacaoDado: DADO_CLICADO
+    AnimacaoDado --> AguardandoZoomIn: DADO_ANIMACAO_FIM
+    AguardandoZoomIn --> AnimacaoZoomIn: ZOOM_IN_TIMEOUT
+    AnimacaoZoomIn --> AguardandoCaminhada: ZOOM_IN_ANIMACAO_FIM
+    AguardandoCaminhada --> AnimacaoCaminhada: CAMINHADA_TIMEOUT
+    AnimacaoCaminhada --> AguardandoZoomOut: CAMINHADA_ANIMACAO_FIM
+    AguardandoZoomOut --> AnimacaoZoomOut: ZOOM_OUT_TIMEOUT
+    AnimacaoZoomOut --> AguardandoNoticia1: ZOOM_OUT_ANIMACAO_FIM
+    AnimacaoCaminhada --> EstadoDeVitoria: Jogador alcança tile final
+    EstadoDeVitoria --> [*]: Reiniciar jogo

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>JEDi Educa - Cadastro</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#cae63d",
+                        "accent-pink": "#ff4d91",
+                        "background-light": "#f8f8f6",
+                        "background-dark": "#1e2111",
+                    },
+                    fontFamily: {
+                        "display": ["Lexend", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Lexend', sans-serif;
+        }
+        .glass-panel {
+            background: rgba(30, 33, 17, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(202, 230, 61, 0.2);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+<!-- Background Image Layer -->
+<div class="fixed inset-0 z-0">
+<img alt="Fun educational space background with stars and planets" class="w-full h-full object-cover opacity-60" data-alt="Fun educational space background with stars and planets" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBEUWIn44VTRyYZLp8nxVcdYNa8kybqfTjqJUiHELAlOHJIZcQLF7hZt6X-mM0RT-Yh4jhJkeIJuTiJ-Vw3wjR-tQvyUMqBWBpyoGEFcgQzLGtFQFZLNL0tVX269NhVkvyjq1M3DJIPsUwTD_i6UgDUQimvUYSctPW1KJWrp9rkQqxtkfLZwfdI9NoNjfYbWJ4R7KMMmjQgv3vhFdylyDFwJdaY8zfqC-IZsxwsf3KH03iJ8GlHo9QL5_SFRbOKGWl9BWQRWhDU6i81"/>
+<div class="absolute inset-0 bg-gradient-to-b from-background-dark/40 via-background-dark/80 to-background-dark"></div>
+</div>
+<!-- Registration Container -->
+<div class="relative z-10 w-full max-w-lg glass-panel rounded-xl shadow-2xl overflow-hidden">
+<!-- Header / Top Bar -->
+<div class="flex items-center p-6 pb-2 justify-between">
+<button class="text-primary hover:bg-primary/10 p-2 rounded-full transition-colors">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<div class="flex-1 flex justify-center pr-10">
+<img alt="JEDi Educa playful logo" class="h-12 w-auto" data-alt="JEDi Educa playful colorful logo" src="../../public/assets/Logo_JEDi_fundo_escuro.png"/>
+</div>
+</div>
+<div class="px-8 pt-4 pb-8">
+<div class="text-center mb-8">
+<h1 class="text-3xl font-bold tracking-tight text-slate-100">Crie sua conta</h1>
+<p class="text-slate-400 mt-2">Junte-se à aventura do conhecimento!</p>
+</div>
+<form class="space-y-5">
+<!-- Nome Completo -->
+<div class="space-y-2">
+<label class="text-sm font-medium text-slate-300 ml-1">Nome Completo</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-primary/60">person</span>
+<input class="w-full bg-background-dark/50 border border-primary/20 rounded-xl py-4 pl-12 pr-4 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-white placeholder:text-slate-500" placeholder="Como quer ser chamado?" type="text"/>
+</div>
+</div>
+<!-- Email -->
+<div class="space-y-2">
+<label class="text-sm font-medium text-slate-300 ml-1">Email</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-primary/60">mail</span>
+<input class="w-full bg-background-dark/50 border border-primary/20 rounded-xl py-4 pl-12 pr-4 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-white placeholder:text-slate-500" placeholder="seu@email.com" type="email"/>
+</div>
+</div>
+<!-- Data de Nascimento -->
+<div class="space-y-2">
+<label class="text-sm font-medium text-slate-300 ml-1">Data de Nascimento</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-primary/60">calendar_today</span>
+<input class="w-full bg-background-dark/50 border border-primary/20 rounded-xl py-4 pl-12 pr-4 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-white placeholder:text-slate-500 [color-scheme:dark]" type="date"/>
+</div>
+</div>
+<!-- Senhas Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="space-y-2">
+<label class="text-sm font-medium text-slate-300 ml-1">Senha</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-primary/60">lock</span>
+<input class="w-full bg-background-dark/50 border border-primary/20 rounded-xl py-4 pl-12 pr-4 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-white placeholder:text-slate-500" placeholder="••••••••" type="password"/>
+</div>
+</div>
+<div class="space-y-2">
+<label class="text-sm font-medium text-slate-300 ml-1">Confirmar Senha</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-primary/60">lock_reset</span>
+<input class="w-full bg-background-dark/50 border border-primary/20 rounded-xl py-4 pl-12 pr-4 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-white placeholder:text-slate-500" placeholder="••••••••" type="password"/>
+</div>
+</div>
+</div>
+<!-- Submit Button -->
+<div class="pt-4">
+<button class="w-full bg-primary hover:bg-primary/90 text-background-dark font-bold text-lg py-4 rounded-xl shadow-[0_4px_20px_rgba(202,230,61,0.3)] active:scale-95 transition-all flex items-center justify-center gap-2" type="submit">
+<span>Cadastrar</span>
+<span class="material-symbols-outlined">rocket_launch</span>
+</button>
+</div>
+</form>
+<!-- Footer Links -->
+<div class="mt-8 text-center">
+<p class="text-slate-400 text-sm">
+                    Já tem uma conta? 
+                    <a class="text-primary font-semibold hover:underline decoration-primary/30 underline-offset-4" href="#">Faça Login</a>
+</p>
+</div>
+</div>
+</div>
+<!-- Decorative Elements -->
+<div class="fixed bottom-10 right-10 z-0 opacity-20 pointer-events-none">
+<span class="material-symbols-outlined text-[120px] text-primary">school</span>
+</div>
+<div class="fixed top-10 left-10 z-0 opacity-20 pointer-events-none rotate-12">
+<span class="material-symbols-outlined text-[80px] text-accent-pink">auto_awesome</span>
+</div>
+</body></html>

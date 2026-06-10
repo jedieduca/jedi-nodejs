@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ajuda de Narração por Voz</title>
+  <style>
+    :root {
+      --bg: #f6f8fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #5b6472;
+      --primary: #1d4ed8;
+      --primary-soft: #dbeafe;
+      --border: #dbe2ea;
+      --ok: #166534;
+      --ok-bg: #dcfce7;
+      --warn: #92400e;
+      --warn-bg: #fef3c7;
+      --shadow: 0 10px 30px rgba(0,0,0,0.08);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(180deg, #eef4ff 0%, var(--bg) 180px);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    .container {
+      width: min(1100px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 24px 0 56px;
+    }
+
+    .hero {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      padding: 28px;
+      margin-top: 18px;
+    }
+
+    h1, h2, h3 {
+      line-height: 1.2;
+      margin: 0 0 14px;
+    }
+
+    h1 {
+      font-size: clamp(1.9rem, 3vw, 2.7rem);
+    }
+
+    h2 {
+      font-size: clamp(1.35rem, 2vw, 1.8rem);
+      margin-top: 26px;
+    }
+
+    h3 {
+      font-size: 1.15rem;
+      margin-top: 20px;
+    }
+
+    p {
+      margin: 0 0 14px;
+    }
+
+    .lead {
+      font-size: 1.06rem;
+      color: var(--muted);
+      max-width: 850px;
+    }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .pill {
+      background: var(--primary-soft);
+      color: var(--primary);
+      border: 1px solid #bfd5ff;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 0.95rem;
+      font-weight: bold;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 18px;
+      margin-top: 24px;
+    }
+
+    .card {
+      grid-column: span 12;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 22px;
+    }
+
+    .platforms {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      margin-top: 18px;
+    }
+
+    .platform {
+      background: #fbfdff;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px;
+    }
+
+    .platform h3 { margin-top: 0; }
+
+    .steps {
+      margin: 10px 0 0 0;
+      padding-left: 22px;
+    }
+
+    .steps li {
+      margin-bottom: 10px;
+    }
+
+    .note, .warning, .success {
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin: 14px 0;
+      border: 1px solid transparent;
+    }
+
+    .note {
+      background: #eef6ff;
+      border-color: #cfe3ff;
+    }
+
+    .warning {
+      background: var(--warn-bg);
+      border-color: #f3d48b;
+      color: var(--warn);
+    }
+
+    .success {
+      background: var(--ok-bg);
+      border-color: #b7e7c4;
+      color: var(--ok);
+    }
+
+    .checklist {
+      margin: 0;
+      padding-left: 22px;
+    }
+
+    .checklist li { margin-bottom: 8px; }
+
+    details {
+      background: #fcfdff;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-bottom: 12px;
+    }
+
+    summary {
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .small {
+      color: var(--muted);
+      font-size: 0.94rem;
+    }
+
+    .footer {
+      margin-top: 24px;
+      color: var(--muted);
+      font-size: 0.92rem;
+      text-align: center;
+    }
+
+    @media (min-width: 860px) {
+      .span-7 { grid-column: span 7; }
+      .span-5 { grid-column: span 5; }
+      .span-6 { grid-column: span 6; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <section class="hero">
+      <h1>Ajuda de narração por voz</h1>
+      <p class="lead">
+        Este jogo usa as vozes que já existem no seu aparelho. Por isso, a narração pode soar diferente em cada celular, tablet ou computador.
+        Aqui você vai entender o motivo, descobrir onde conseguir mais vozes grátis e aprender a instalar tudo passo a passo.
+      </p>
+      <div class="pill-row">
+        <span class="pill">Android</span>
+        <span class="pill">iPhone / iPad</span>
+        <span class="pill">Windows</span>
+        <span class="pill">Mac</span>
+      </div>
+    </section>
+
+    <section class="grid">
+      <article class="card span-7">
+        <h2>1) Por que a voz muda de um dispositivo para outro?</h2>
+        <p>
+          O jogo não leva uma voz própria dentro dele. Em vez disso, ele pede ao navegador e ao sistema do aparelho para falar o texto.
+          Então a voz usada depende do que estiver disponível naquele dispositivo.
+        </p>
+
+        <div class="note">
+          <strong>Isso pode variar por vários motivos:</strong>
+          <ul class="checklist">
+            <li><strong>Idioma e região</strong>: um aparelho configurado em português do Brasil tende a oferecer vozes diferentes de outro configurado em inglês ou espanhol.</li>
+            <li><strong>Sistema operacional</strong>: Android, iPhone, Windows e Mac trazem conjuntos de vozes diferentes.</li>
+            <li><strong>Marca do aparelho</strong>: alguns fabricantes incluem motor de voz próprio além do motor padrão.</li>
+            <li><strong>Vozes já instaladas</strong>: alguns aparelhos têm poucas vozes baixadas; outros já vêm com mais opções.</li>
+            <li><strong>Navegador usado</strong>: a lista mostrada no jogo pode mudar um pouco conforme o navegador acessa as vozes do sistema.</li>
+          </ul>
+        </div>
+
+        <p>
+          Por isso você pode ver diferenças como voz masculina ou feminina, sotaque brasileiro ou europeu, nome da voz, qualidade mais simples ou mais natural e quantidade total de opções.
+        </p>
+      </article>
+
+      <article class="card span-5">
+        <h2>2) Antes de instalar novas vozes</h2>
+        <div class="success">
+          <strong>Faça isso primeiro:</strong>
+          <ol class="steps">
+            <li>Abra as configurações de voz dentro do jogo.</li>
+            <li>Veja se já existe uma voz melhor disponível.</li>
+            <li>Se não houver, siga o passo a passo do seu aparelho abaixo.</li>
+            <li>Depois de instalar a nova voz, feche e abra o navegador novamente.</li>
+            <li>Abra o jogo de novo e teste a lista de vozes.</li>
+          </ol>
+        </div>
+
+        <div class="warning">
+          Em alguns aparelhos, a nova voz só aparece no jogo depois de reiniciar o navegador ou até o dispositivo.
+        </div>
+      </article>
+
+      <article class="card">
+        <h2>3) Onde conseguir mais vozes grátis</h2>
+        <div class="platforms">
+          <div class="platform">
+            <h3>Android</h3>
+            <p>
+              Normalmente as vozes grátis vêm pelo mecanismo de texto para fala do próprio aparelho ou pelo mecanismo do Google.
+            </p>
+            <p class="small">Procure por: Configurações → Acessibilidade → Saída de texto para fala.</p>
+          </div>
+
+          <div class="platform">
+            <h3>iPhone / iPad</h3>
+            <p>
+              As vozes grátis ficam nas opções de <strong>Conteúdo Falado</strong> e podem ter versões de melhor qualidade para download.
+            </p>
+            <p class="small">Procure por: Ajustes → Acessibilidade → Conteúdo Falado → Vozes.</p>
+          </div>
+
+          <div class="platform">
+            <h3>Windows</h3>
+            <p>
+              Você pode instalar vozes naturais do Narrador e também baixar idiomas com recursos de fala.
+            </p>
+            <p class="small">Procure por: Configurações → Acessibilidade → Narrador.</p>
+          </div>
+
+          <div class="platform">
+            <h3>Mac</h3>
+            <p>
+              O macOS permite baixar vozes adicionais diretamente nas configurações do sistema, inclusive vozes de outros idiomas.
+            </p>
+            <p class="small">Procure por: Menu Apple → Ajustes do Sistema → Acessibilidade → Fala e Leitura.</p>
+          </div>
+        </div>
+      </article>
+
+      <article class="card span-6">
+        <h2>4) Passo a passo simples — Android</h2>
+        <ol class="steps">
+          <li>Abra o app <strong>Configurações</strong>.</li>
+          <li>Toque em <strong>Acessibilidade</strong>.</li>
+          <li>Toque em <strong>Saída de texto para fala</strong>.<br><span class="small">Em alguns aparelhos esse nome pode variar um pouco.</span></li>
+          <li>Veja qual é o <strong>mecanismo preferido</strong>. Pode ser o do Google, o do fabricante ou outro instalado.</li>
+          <li>Toque no ícone de <strong>engrenagem</strong> ao lado do mecanismo ativo, se existir.</li>
+          <li>Toque em <strong>Instalar dados de voz</strong>.</li>
+          <li>Escolha o idioma desejado, como <strong>Português (Brasil)</strong>.</li>
+          <li>Baixe a voz que quiser.</li>
+          <li>Volte para a tela anterior e ajuste, se quiser, a <strong>velocidade</strong> e o <strong>tom</strong>.</li>
+          <li>Feche e abra novamente o navegador e depois o jogo.</li>
+        </ol>
+
+        <div class="note">
+          Se o seu aparelho tiver poucas opções, tente selecionar o mecanismo do Google como mecanismo preferido, quando ele estiver disponível no aparelho.
+        </div>
+      </article>
+
+      <article class="card span-6">
+        <h2>5) Passo a passo simples — iPhone / iPad</h2>
+        <ol class="steps">
+          <li>Abra o app <strong>Ajustes</strong>.</li>
+          <li>Toque em <strong>Acessibilidade</strong>.</li>
+          <li>Toque em <strong>Conteúdo Falado</strong>.</li>
+          <li>Toque em <strong>Vozes</strong>.</li>
+          <li>Escolha o idioma desejado, como <strong>Português</strong>.</li>
+          <li>Escolha a variação desejada, como <strong>Brasil</strong>.</li>
+          <li>Toque em uma voz disponível.</li>
+          <li>Se aparecer opção de download ou qualidade aprimorada, toque para baixar.</li>
+          <li>Depois volte e selecione essa voz como a voz usada pelo sistema.</li>
+          <li>Feche e abra o navegador novamente e teste no jogo.</li>
+        </ol>
+
+        <div class="warning">
+          Nem toda voz do iPhone fica disponível para aplicativos e jogos. Em geral, o que costuma funcionar melhor para apps é a voz escolhida em <strong>Conteúdo Falado</strong>.
+        </div>
+      </article>
+
+      <article class="card span-6">
+        <h2>6) Passo a passo simples — Windows</h2>
+        <ol class="steps">
+          <li>Abra o menu <strong>Iniciar</strong>.</li>
+          <li>Entre em <strong>Configurações</strong>.</li>
+          <li>Abra <strong>Acessibilidade</strong>.</li>
+          <li>Entre em <strong>Narrador</strong>.</li>
+          <li>Procure a seção de <strong>vozes naturais</strong>.</li>
+          <li>Clique em <strong>Adicionar</strong>.</li>
+          <li>Escolha a voz que deseja instalar.</li>
+          <li>Clique em <strong>Instalar</strong>.</li>
+          <li>Se precisar de outro idioma, vá também em <strong>Hora e idioma</strong> e verifique os recursos de fala do idioma.</li>
+          <li>Depois feche e abra o navegador novamente e teste no jogo.</li>
+        </ol>
+
+        <div class="note">
+          Em alguns casos, o Windows também precisa baixar recursos de fala do idioma escolhido. Isso pode aumentar as opções disponíveis para leitura em voz alta.
+        </div>
+      </article>
+
+      <article class="card span-6">
+        <h2>7) Passo a passo simples — Mac</h2>
+        <ol class="steps">
+          <li>Clique no menu <strong>Apple</strong>.</li>
+          <li>Abra <strong>Ajustes do Sistema</strong>.</li>
+          <li>Entre em <strong>Acessibilidade</strong>.</li>
+          <li>Abra <strong>Fala e Leitura</strong> ou <strong>Read &amp; Speak</strong>.<br><span class="small">O nome pode aparecer em inglês dependendo do idioma do sistema.</span></li>
+          <li>Encontre a opção <strong>Voz do sistema</strong>.</li>
+          <li>Clique no seletor da voz.</li>
+          <li>Abra as opções para ver mais vozes.</li>
+          <li>Escolha o idioma e a voz desejada.</li>
+          <li>Baixe a voz, se ela ainda não estiver instalada.</li>
+          <li>Selecione essa voz como voz do sistema e teste no jogo depois de reabrir o navegador.</li>
+        </ol>
+
+        <div class="success">
+          No Mac, também é possível baixar vozes adicionais de outros idiomas, o que pode ser útil quando o jogo trabalha com narração multilíngue.
+        </div>
+      </article>
+
+      <article class="card span-7">
+        <h2>8) O que fazer se a nova voz não aparecer no jogo</h2>
+        <ol class="steps">
+          <li>Feche completamente o navegador.</li>
+          <li>Abra o navegador de novo.</li>
+          <li>Recarregue a página do jogo.</li>
+          <li>Abra a configuração de voz do jogo outra vez.</li>
+          <li>Se ainda não aparecer, reinicie o aparelho.</li>
+          <li>Confira se a voz foi realmente instalada e não apenas selecionada para download.</li>
+          <li>Verifique se o idioma da nova voz combina com o idioma do texto que o jogo está narrando.</li>
+        </ol>
+      </article>
+
+      <article class="card span-5">
+        <h2>9) Perguntas rápidas</h2>
+
+        <details>
+          <summary>Por que no meu aparelho só aparecem 2 ou 3 vozes?</summary>
+          <p>Porque esse aparelho pode ter poucas vozes instaladas, ou porque o navegador só está enxergando as vozes disponíveis localmente no sistema.</p>
+        </details>
+
+        <details>
+          <summary>Posso usar voz masculina ou feminina?</summary>
+          <p>Depende das vozes que existem no seu aparelho. Em alguns dispositivos há várias opções; em outros, poucas.</p>
+        </details>
+
+        <details>
+          <summary>Preciso pagar para instalar vozes?</summary>
+          <p>As opções mostradas neste guia usam recursos gratuitos do próprio sistema operacional do aparelho.</p>
+        </details>
+
+        <details>
+          <summary>Troquei a voz no sistema, mas o jogo continua igual. E agora?</summary>
+          <p>Feche e abra o navegador. Se não resolver, reinicie o aparelho e teste novamente.</p>
+        </details>
+      </article>
+
+      <article class="card">
+        <h2>10) Resumo rápido</h2>
+        <div class="note">
+          <ul class="checklist">
+            <li>O jogo usa as vozes do dispositivo.</li>
+            <li>Cada sistema oferece vozes diferentes.</li>
+            <li>Você pode baixar mais vozes grátis no próprio sistema.</li>
+            <li>Depois de instalar, reabra o navegador e teste novamente.</li>
+          </ul>
+        </div>
+      </article>
+    </section>
+
+    <div class="footer">
+      Esta página foi feita para ajudar usuários com pouca familiaridade com tecnologia a configurar melhor a narração do jogo.
+    </div>
+  </div>
+</body>
+</html>

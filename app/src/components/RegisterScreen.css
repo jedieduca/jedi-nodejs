@@ -160,8 +160,6 @@
   .register-screen-form input#register-name,
   .register-screen-form label[for="register-email"],
   .register-screen-form input#register-email,
-  .register-screen-form label[for="register-date"],
-  .register-screen-form input#register-date,
   .register-screen-error,
   .register-screen-submit,
   .register-screen-footer {

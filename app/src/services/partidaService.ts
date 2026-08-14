@@ -1,6 +1,8 @@
 import { ResumoPartida } from '../types/partida';
+import { getBackendEndpoint } from '../config/backend';
+import { isFetchFailure, toNetworkFailureError } from '../utils/networkFailure';
 
-const SALVAR_PARTIDA_URL = 'https://memore-net.com/api/JEDI-API/partidasperguntas/salvarPartida';
+const SALVAR_PARTIDA_URL = getBackendEndpoint('salvarPartida');
 
 interface PartidaApiError {
   erro: string;
@@ -36,18 +38,31 @@ const extrairIdDaResposta = (rawText: string): string => {
 };
 
 export const salvarPartida = async (resumo: ResumoPartida): Promise<string> => {
-  const response = await fetch(SALVAR_PARTIDA_URL, {
-    method: 'POST',
-    mode: 'cors',
-    credentials: 'omit',
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(normalizarResumoParaPayload(resumo))
-  });
+  let response: Response;
+  try {
+    response = await fetch(SALVAR_PARTIDA_URL, {
+      method: 'POST',
+      mode: 'cors',
+      credentials: 'omit',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(normalizarResumoParaPayload(resumo))
+    });
+  } catch (error) {
+    if (isFetchFailure(error)) {
+      throw toNetworkFailureError(error, 'RESUMO DA PARTIDA', SALVAR_PARTIDA_URL, 'match');
+    }
+    throw error;
+  }
 
-  const rawText = await response.text();
+  let rawText = '';
+  try {
+    rawText = await response.text();
+  } catch (error) {
+    throw toNetworkFailureError(error, 'RESUMO DA PARTIDA', SALVAR_PARTIDA_URL, 'match');
+  }
 
   if (!response.ok) {
     const textoNormalizado = rawText.trim();
@@ -64,7 +79,7 @@ export const salvarPartida = async (resumo: ResumoPartida): Promise<string> => {
       }
     }
 
-    throw new Error(`Falha ao salvar partida: HTTP ${response.status}`);
+    throw toNetworkFailureError(new Error(`Falha ao salvar partida: HTTP ${response.status}`), 'RESUMO DA PARTIDA', SALVAR_PARTIDA_URL, 'match');
   }
 
   const textoNormalizado = rawText.trim();
@@ -75,7 +90,11 @@ export const salvarPartida = async (resumo: ResumoPartida): Promise<string> => {
     }
   }
 
-  return extrairIdDaResposta(rawText);
+  try {
+    return extrairIdDaResposta(rawText);
+  } catch (error) {
+    throw toNetworkFailureError(error, 'RESUMO DA PARTIDA', SALVAR_PARTIDA_URL, 'match');
+  }
 };
 
 const partidaService = {

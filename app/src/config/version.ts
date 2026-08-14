@@ -5,6 +5,8 @@
  * A versão é injetada via variável de ambiente REACT_APP_VERSION no processo de build.
  */
 
+import { getActiveBackendLabel } from './backend';
+
 /**
  * Versão da aplicação obtida automaticamente do package.json
  * Fallback para '0.1.0' caso a variável de ambiente não esteja disponível
@@ -12,7 +14,7 @@
 export const APP_VERSION: string = 
   process.env.REACT_APP_VERSION || 
   process.env.npm_package_version || 
-  '0.1.7';
+  '0.1.8';
 
 /**
  * Informações de build (disponíveis apenas em produção após build)
@@ -76,5 +78,12 @@ export const getFullVersionInfo = (): string => {
  */
 export const getSimpleVersion = (): string => {
   return APP_VERSION;
+};
+
+/**
+ * Versão simples com identificador do backend ativo.
+ */
+export const getVersionWithBackend = (): string => {
+  return `${getSimpleVersion()} (${getActiveBackendLabel()})`;
 };
 

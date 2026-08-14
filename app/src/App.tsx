@@ -36,12 +36,16 @@ import { clampCameraDistanceFactor, getDefaultCameraDistanceFactor } from './con
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import LoginScreen from './components/LoginScreen';
 import RegisterScreen from './components/RegisterScreen';
+import ForgotPasswordScreen from './components/ForgotPasswordScreen';
 import partidaService from './services/partidaService';
 import { ResumoPartida, ResumoPartidaJogada } from './types/partida';
 import rankingService from './services/rankingService';
 import { RankingEntry, VictoryRankingStatus } from './types/ranking';
 import VictoryPanel from './components/VictoryPanel';
 import { getHelpContentByType } from './config/helpTexts';
+import NetworkFailurePopup from './components/NetworkFailurePopup';
+import { NetworkFailureDetails, preloadRequiredImage } from './utils/networkFailure';
+import { diceAssetUrls, evaluationButtonAssetUrls } from './config/criticalAssets';
 
 // MODIFICAÇÃO: Estados de zoom removidos (AguardandoZoomIn, AnimacaoZoomIn, AguardandoZoomOut, AnimacaoZoomOut)
 // Fluxo simplificado: AnimacaoDado -> AguardandoCaminhada -> AnimacaoCaminhada -> AguardandoProximaNoticia -> AguardandoNoticia1
@@ -325,25 +329,6 @@ const getAuthenticatedPlayerEmail = (): string => {
   return 'nao-informado@local';
 };
 
-const preloadImages = async (urls: (string | null | undefined)[]) => {
-  const unique = Array.from(new Set(urls.filter(Boolean) as string[]));
-  await Promise.all(unique.map(async (src) => {
-    try {
-      await new Promise<void>((resolve) => {
-        const img = new Image();
-        img.onload = () => resolve();
-        img.onerror = () => resolve();
-        img.src = src;
-        if (img.decode) {
-          img.decode().then(() => resolve()).catch(() => resolve());
-        }
-      });
-    } catch {
-      // Ignorar falhas de decode; não bloqueia UI
-    }
-  }));
-};
-
 // Constante de aceleração do dado - multiplica o número de passos
 const ACELERACAO_DADO = 4;
 
@@ -351,108 +336,6 @@ const pillAudio = new Audio('/assets/sons/magic4c.mp3');
 const portalAudio = new Audio('/assets/sons/fantasy.mp3');
 const skateAudio = new Audio('/assets/sons/skate7a.mp3');
 
-
-const FAKE_RETURNED_RANKING_DATA = [
-  {
-    idPartida: 15,
-    jogador: "Marcos",
-    pontuacao: 127000,
-    percentualAcertos: 100.0000,
-    tempoGasto: 57.3413,
-    totalPartidas: 1,
-    posicao: 1
-  },
-  {
-    idPartida: 14,
-    jogador: "Rafael",
-    pontuacao: 119000,
-    percentualAcertos: 100.0000,
-    tempoGasto: 177.404,
-    totalPartidas: 1,
-    posicao: 2
-  },
-  {
-    idPartida: 13,
-    jogador: "Liz",
-    pontuacao: 109000,
-    percentualAcertos: 100.0000,
-    tempoGasto: 78.3418,
-    totalPartidas: 1,
-    posicao: 3
-  },
-  {
-    idPartida: 12,
-    jogador: "Renato",
-    pontuacao: 108000,
-    percentualAcertos: 100.0000,
-    tempoGasto: 46.8211,
-    totalPartidas: 1,
-    posicao: 4
-  },
-  {
-    idPartida: 11,
-    jogador: "Darcy",
-    pontuacao: 102000,
-    percentualAcertos: 100.0000,
-    tempoGasto: 2.80006,
-    totalPartidas: 1,
-    posicao: 5
-  },
-  {
-    idPartida: 22,
-    jogador: "Ana",
-    pontuacao: 102000,
-    percentualAcertos: 100.0000,
-    tempoGasto: 11.4203,
-    totalPartidas: 1,
-    posicao: 6
-  },
-  {
-    idPartida: 21,
-    jogador: "Felipe",
-    pontuacao: 102000,
-    percentualAcertos: 100.0000,
-    tempoGasto: 21.4405,
-    totalPartidas: 3,
-    posicao: 7
-  },
-  {
-    idPartida: 20,
-    jogador: "Val",
-    pontuacao: 102000,
-    percentualAcertos: 83.3333,
-    tempoGasto: 24.2606,
-    totalPartidas: 2,
-    posicao: 8
-  },
-  {
-    idPartida: 10,
-    jogador: "Renata",
-    pontuacao: 102000,
-    percentualAcertos: 47.6190,
-    tempoGasto: 5.42012,
-    totalPartidas: 25,
-    posicao: 9
-  },
-  {
-    idPartida: 1,
-    jogador: "Treice",
-    pontuacao: 101000,
-    percentualAcertos: 100.0000,
-    tempoGasto: 7.12016,
-    totalPartidas: 5,
-    posicao: 10
-  },
-  {
-    idPartida: 11,
-    jogador: "Darcy",
-    pontuacao: 102000,
-    percentualAcertos: 100.0000,
-    tempoGasto: 2.80006,
-    totalPartidas: 1,
-    posicao: 5
-  }
- ];
 
  const splitVictoryRankingEntries = (entries: RankingEntry[]) => {  
   const rankingLength =  entries.length - 1 > MAX_RANKING_ENTRIES ? MAX_RANKING_ENTRIES : entries.length - 1;
@@ -463,8 +346,12 @@ const FAKE_RETURNED_RANKING_DATA = [
   };
 };
 
+interface GameContentProps {
+  onNetworkFailure: (details: NetworkFailureDetails) => void;
+}
+
 // Componente interno que contém o jogo real
-const GameContent: React.FC = () => {
+const GameContent: React.FC<GameContentProps> = ({ onNetworkFailure }) => {
   const { logout } = useAuth();
   usePerfDiagnostics();
 
@@ -478,7 +365,7 @@ const GameContent: React.FC = () => {
     };
   }, []);
   // Estados relacionados às notícias
-  const { news: initialNews, loading: loadingNews } = useNews();
+  const { news: initialNews, loading: loadingNews, error: newsLoadError } = useNews();
   //const initialNews = noticiasJson.items;
 
   //const loadingNews = false;
@@ -543,6 +430,7 @@ const GameContent: React.FC = () => {
   const victorySessionTokenRef = useRef(0);
   const victoryPanelRequestRef = useRef<number>(0);
   const victoryFlowStartedRef = useRef(false);
+  const criticalAssetsFailureReportedRef = useRef(false);
   const diceAnimationInProgressRef = useRef(false);
   const movementPromiseRef = useRef<Promise<void> | null>(null);
   // MODIFICAÇÃO: zoomInPromiseRef e zoomOutPromiseRef removidos - zoom agora é fixo
@@ -647,6 +535,12 @@ const GameContent: React.FC = () => {
         }
       } catch (error) {
         console.error('[ResumoPartida] ❌ Falha ao enviar resumo da partida:', error);
+        onNetworkFailure({
+          resourceLabel: 'RESUMO DA PARTIDA',
+          context: showVictoryPanel ? 'victory' : 'match',
+          source: 'enviarResumoPartida',
+          cause: error
+        });
       } finally {
         resumoEmEnvioRef.current = false;
 
@@ -656,7 +550,7 @@ const GameContent: React.FC = () => {
         }
       }
     })();
-  }, [atualizarTempoGastoResumo]);
+  }, [atualizarTempoGastoResumo, onNetworkFailure, showVictoryPanel]);
 
   const aguardarFlushResumo = useCallback(async () => {
     await resumoFlushPromiseRef.current;
@@ -690,9 +584,6 @@ const GameContent: React.FC = () => {
 
       let rankingEntries = await rankingService.buscarRanking(idPartida);
       console.log('🔍 **** [Ranking][App] 🔍 Ranking buscado:', rankingEntries);
-      if(rankingEntries.length < 2) {
-        rankingEntries = FAKE_RETURNED_RANKING_DATA as RankingEntry[];
-      }
 
       if (victoryPanelRequestRef.current !== requestId) {
         return;
@@ -719,8 +610,14 @@ const GameContent: React.FC = () => {
       console.error('[VictoryRanking] ❌ Falha ao carregar ranking:', error);
       setVictoryRankingStatus('error');
       setVictoryRankingErrorMessage(errorMessage);
+      onNetworkFailure({
+        resourceLabel: 'RANKING',
+        context: 'victory',
+        source: 'carregarRankingDaVitoria',
+        cause: error
+      });
     }
-  }, []);
+  }, [onNetworkFailure]);
 
   useEffect(() => {
     if (!showVictoryPanel || victoryPanelLoadNonce === 0) {
@@ -736,6 +633,56 @@ const GameContent: React.FC = () => {
   const newsHistoryLengthRef = useRef<number>(0);
   
   const spriteLoading = useSpriteLoading(pendingSelectedCharacters ?? []);
+
+  useEffect(() => {
+    if (!spriteLoading.error) {
+      return;
+    }
+
+    onNetworkFailure({
+      resourceLabel: 'SPRITES DO PERSONAGEM',
+      context: gameStarted ? 'match' : 'character-selection',
+      source: 'useSpriteLoading',
+      cause: spriteLoading.error
+    });
+  }, [gameStarted, onNetworkFailure, spriteLoading.error]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const preloadCriticalAssets = async () => {
+      try {
+        await Promise.all([
+          ...diceAssetUrls.map((assetUrl) =>
+            preloadRequiredImage(assetUrl, 'DADO', 'criticalAssets.dice', 'match')
+          ),
+          ...evaluationButtonAssetUrls.map((assetUrl) =>
+            preloadRequiredImage(assetUrl, 'BOTÕES DE AVALIAÇÃO', 'criticalAssets.evaluationButtons', 'match')
+          )
+        ]);
+      } catch (error) {
+        if (cancelled || criticalAssetsFailureReportedRef.current) {
+          return;
+        }
+
+        criticalAssetsFailureReportedRef.current = true;
+        onNetworkFailure({
+          resourceLabel: error && typeof error === 'object' && 'resourceLabel' in error
+            ? String((error as { resourceLabel: unknown }).resourceLabel)
+            : 'DADO',
+          context: 'match',
+          source: 'preloadCriticalAssets',
+          cause: error
+        });
+      }
+    };
+
+    void preloadCriticalAssets();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [onNetworkFailure]);
 
   useEffect(() => {
     const unsubscribe = speechService.subscribeToVoices(setAvailableVoices);
@@ -881,12 +828,22 @@ const GameContent: React.FC = () => {
   }, []);
 
   const handleNextNewsClick = useCallback(() => {
+    if (newsRef.current.length === 0) {
+      onNetworkFailure({
+        resourceLabel: 'BOTÃO Próxima Notícia',
+        context: 'match',
+        source: 'handleNextNewsClick',
+        cause: 'Lista de notícias indisponível'
+      });
+      return;
+    }
+
     inicioTempoJogadaRef.current = performance.now();
     console.log('[ResumoPartida] ⏱️ Início da jogada (AguardandoNoticia1):', {
       jogadaNumero: resumoDaPartidaRef.current.jogadas.length + 1
     });
     dispatchGameEvent({ type: 'PROXIMA_NOTICIA' });
-  }, [dispatchGameEvent]);
+  }, [dispatchGameEvent, onNetworkFailure]);
 
   const handleGamePreferencesChange = useCallback((updates: Partial<GamePreferences>) => {
     setGamePreferences((prev) => {
@@ -918,7 +875,22 @@ const GameContent: React.FC = () => {
     const mountTimer = startPerfTimer('ui:news-panel:mount');
     
     const preloadTimer = startPerfTimer('ui:news-panel:preload');
-    await preloadImages([news.caminhoimagem]);
+    try {
+      await Promise.all(
+        [news.caminhoimagem]
+          .filter(Boolean)
+          .map((src) => preloadRequiredImage(src as string, 'IMAGEM DA NOTÍCIA', 'showNewsPanel', 'match'))
+      );
+    } catch (error) {
+      // Não precisa reportar erro, pois a imagem é opcional
+      // onNetworkFailure({
+      //   resourceLabel: 'IMAGEM DA NOTÍCIA',
+      //   context: 'match',
+      //   source: 'showNewsPanel',
+      //   cause: error
+      // });
+      // return;
+    }
     preloadTimer?.end();
     
     lastEvaluatedNewsIdRef.current = null;
@@ -932,7 +904,7 @@ const GameContent: React.FC = () => {
     requestAnimationFrame(() => {
       logPerfEvent('ui:news-panel:content-ready');
     });
-  }, []);
+  }, [/*onNetworkFailure*/]);
 
   const showExplanationPanelWithData = useCallback(async (newsText: string, explanationText: string, stampType?: 'fake' | 'not-fake') => {
     const mountTimer = startPerfTimer('ui:explanation-panel:mount');
@@ -1003,6 +975,12 @@ const GameContent: React.FC = () => {
 
     if (!newsArray || newsArray.length === 0) {
       console.error('selectNewsWithoutRepetition: Array de notícias vazio');
+      onNetworkFailure({
+        resourceLabel: 'NOTÍCIAS',
+        context: 'match',
+        source: 'selectNewsWithoutRepetition',
+        cause: 'Array de notícias vazio'
+      });
       return;
     }
 
@@ -1059,7 +1037,7 @@ const GameContent: React.FC = () => {
     } finally {
       selectionInFlightRef.current = false;
     }
-  }, [resetUsedNewsCycle, showNewsPanel]);
+  }, [onNetworkFailure, resetUsedNewsCycle, showNewsPanel]);
 
   const selectNewsWithoutRepetitionRef = useRef(selectNewsWithoutRepetition);
 
@@ -1104,6 +1082,21 @@ const GameContent: React.FC = () => {
       newsRef.current = initialNews;
     }
   }, [initialNews, loadingNews]);  // ← Também simplificar as dependências
+
+  useEffect(() => {
+    if (loadingNews) {
+      return;
+    }
+
+    if (newsLoadError || !initialNews || initialNews.length === 0) {
+      onNetworkFailure({
+        resourceLabel: 'NOTÍCIAS',
+        context: gameStarted ? 'match' : 'character-selection',
+        source: 'useNews',
+        cause: newsLoadError ?? 'Lista de notícias vazia'
+      });
+    }
+  }, [gameStarted, initialNews, loadingNews, newsLoadError, onNetworkFailure]);
   
 
   // Função para buscar regra em caso de erro
@@ -2545,6 +2538,25 @@ const GameContent: React.FC = () => {
     window.location.reload();
   }, []);
 
+  const validateDiceAssetsBeforeUse = useCallback(async (source: string): Promise<boolean> => {
+    try {
+      await Promise.all(
+        diceAssetUrls.map((assetUrl) =>
+          preloadRequiredImage(assetUrl, 'DADO', source, 'match')
+        )
+      );
+      return true;
+    } catch (error) {
+      onNetworkFailure({
+        resourceLabel: 'DADO',
+        context: 'match',
+        source,
+        cause: error
+      });
+      return false;
+    }
+  }, [onNetworkFailure]);
+
   const startDiceAnimation = useCallback((value: number): Promise<void> => {
     if (diceAnimationIntervalRef.current !== null) {
       clearInterval(diceAnimationIntervalRef.current);
@@ -2595,8 +2607,15 @@ const GameContent: React.FC = () => {
     pendingDiceValueRef.current = value;
 
     setIsDiceAnimating(true);
+    let shouldDispatchDiceEnd = true;
 
     try {
+      const diceAssetsReady = await validateDiceAssetsBeforeUse('startDiceFlow');
+      if (!diceAssetsReady) {
+        shouldDispatchDiceEnd = false;
+        return;
+      }
+
       // MODIFICAÇÃO: Chamada a setZoomToDice() removida - zoom agora é fixo via preferências
       await startDiceAnimation(value);
 
@@ -2624,9 +2643,11 @@ const GameContent: React.FC = () => {
       setIsDiceAnimating(false);
       //setIsDiceEnabled(false);
       diceAnimationInProgressRef.current = false;
-      dispatchGameEvent({ type: 'DADO_ANIMACAO_FIM' });
+      if (shouldDispatchDiceEnd) {
+        dispatchGameEvent({ type: 'DADO_ANIMACAO_FIM' });
+      }
     }
-  }, [dispatchGameEvent, players.length, setActivePlayerMoves, setMovesLeft, startDiceAnimation]);
+  }, [dispatchGameEvent, players.length, setActivePlayerMoves, setMovesLeft, startDiceAnimation, validateDiceAssetsBeforeUse]);
 
   // MODIFICAÇÃO: Funções startZoomIn e startZoomOut removidas
   // O zoom agora é fixo via preferências, não há mais transições de zoom
@@ -3331,7 +3352,13 @@ const GameContent: React.FC = () => {
       },
       LancamentoDado: () => {
         console.log('[FSM] Entrou em LancamentoDado, habilitando dado');
-        setIsDiceEnabled(true);
+        setIsDiceEnabled(false);
+        void (async () => {
+          const diceAssetsReady = await validateDiceAssetsBeforeUse('LancamentoDado');
+          if (diceAssetsReady) {
+            setIsDiceEnabled(true);
+          }
+        })();
       },
       AnimacaoDado: () => {
         console.log('[FSM] Entrou em AnimacaoDado, aguardando término da animação do dado');
@@ -3346,7 +3373,7 @@ const GameContent: React.FC = () => {
         startMovement();
       }
     } satisfies Partial<Record<GameStateName, () => void>>;
-  }, [enterAguardandoNoticia1, enterAvaliacaoNoticia, enterAguardandoProximaNoticia, resetUsedNewsCycle, scheduleStateEvent, startDiceFlow, startMovement]);
+  }, [enterAguardandoNoticia1, enterAvaliacaoNoticia, enterAguardandoProximaNoticia, resetUsedNewsCycle, scheduleStateEvent, startDiceFlow, startMovement, validateDiceAssetsBeforeUse]);
 
   useEffect(() => {
     if (previousGameStateRef.current === gameState) {
@@ -3402,6 +3429,18 @@ const GameContent: React.FC = () => {
     }
     return 'verde';
   }
+
+  const handleRenderedImageError = useCallback((resourceLabel: string, source: string) => (
+    event: React.SyntheticEvent<HTMLImageElement>
+  ) => {
+    const imageElement = event.currentTarget;
+    onNetworkFailure({
+      resourceLabel,
+      context: gameStarted ? 'match' : 'character-selection',
+      source,
+      cause: imageElement.currentSrc || imageElement.src
+    });
+  }, [gameStarted, onNetworkFailure]);
 
 
   // Nenhum cleanup necessário depois de mover para refs booleanas
@@ -3531,6 +3570,7 @@ const GameContent: React.FC = () => {
           <img
             src="/tiabel-explicando-1024.png"
             alt="Imagem da tIA Bel"
+            onError={handleRenderedImageError('IMAGEM DA EXPLICAÇÃO', 'explanation-tiabel')}
             /* 3. Imagem preenche o wrapper sem distorcer */
             style={{ width: '110%', height: '110%', objectFit: 'cover', borderRadius: '50%' }}
           />
@@ -3552,6 +3592,7 @@ const GameContent: React.FC = () => {
                 src="/assets/Fake.png"
                 alt="Carimbo Fake News"
                 className="fake-stamp-image"
+                onError={handleRenderedImageError('CARIMBO FAKE', 'explanation-stamp-fake')}
               />
             </div>
           )}
@@ -3561,6 +3602,7 @@ const GameContent: React.FC = () => {
                 src="/assets/Real.png"
                 alt="Carimbo Fake News"
                 className="fake-stamp-image"
+                onError={handleRenderedImageError('CARIMBO REAL', 'explanation-stamp-real')}
               />
             </div>
           )}
@@ -3653,6 +3695,7 @@ const GameContent: React.FC = () => {
         backgroundImageUrl={'cenario_jogo_fundo_1.9.png'} // MODIFICAÇÃO: Atualizado para nova imagem de fundo
         containerRef={gameContainerRef as React.RefObject<HTMLDivElement>}
         onCameraReady={handleCameraReady} // NOVO: callback para câmera
+        onResourceLoadError={onNetworkFailure}
         dynamicZoomFactor={currentZoomFactor} // NOVO: zoom dinâmico
       >
         {/* === IMG do Portal no tile {x:2, y:36} === */}
@@ -3673,6 +3716,7 @@ const GameContent: React.FC = () => {
           <img
             src="/Portal2.png"
             alt="Portal de Desmaterialização"
+            onError={handleRenderedImageError('PORTAL', 'portal-image')}
             style={{
               position: 'relative',
               pointerEvents: 'none',
@@ -3782,6 +3826,7 @@ const GameContent: React.FC = () => {
             className="pirula-image"
             src={`/pilula_${getPillColor()}.png`}
             alt="Pílula colorida"
+            onError={handleRenderedImageError('PÍLULA', 'pill-image-0')}
             style={{ width: 43, height: 89, pointerEvents: 'none' }}
           />
         </div>
@@ -3804,6 +3849,7 @@ const GameContent: React.FC = () => {
             className="pirula-image"
             src={`/pilula_${getPillColor()}.png`}
             alt="Pílula colorida"
+            onError={handleRenderedImageError('PÍLULA', 'pill-image-1')}
             style={{ width: 43, height: 89, pointerEvents: 'none' }}
           />
         </div>
@@ -3826,6 +3872,7 @@ const GameContent: React.FC = () => {
             className="pirula-image"
             src={`/pilula_${getPillColor()}.png`}
             alt="Pílula colorida"
+            onError={handleRenderedImageError('PÍLULA', 'pill-image-2')}
             style={{ width: 43, height: 89, pointerEvents: 'none' }}
           />
         </div>
@@ -4086,6 +4133,7 @@ const GameContent: React.FC = () => {
       key={`macaco-${index}`}
       src={animation}
       alt="Macaco animado"
+      onError={handleRenderedImageError('MACACOS', `macaco-${monkeyIndex}`)}
       style={{
         transformOrigin: 'center center',
         position: 'absolute',
@@ -4102,8 +4150,9 @@ const GameContent: React.FC = () => {
 };
 
 const AppContent: React.FC = () => {
-  const { user, isLoading } = useAuth();
-  const [authScreen, setAuthScreen] = useState<'login' | 'register'>('login');
+  const { user, isLoading, logout } = useAuth();
+  const [authScreen, setAuthScreen] = useState<'login' | 'register' | 'forgot-password'>('login');
+  const [networkFailure, setNetworkFailure] = useState<NetworkFailureDetails | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -4111,22 +4160,81 @@ const AppContent: React.FC = () => {
     }
   }, [user]);
 
+  const handleNetworkFailure = useCallback((details: NetworkFailureDetails) => {
+    console.error('[NetworkFailure]', details.source ?? details.resourceLabel, details.cause ?? '');
+    setNetworkFailure((current) => current ?? details);
+  }, []);
+
+  const handleNetworkFailureExit = useCallback(() => {
+    const context = networkFailure?.context ?? (user ? 'match' : 'auth');
+
+    if (context === 'match' || context === 'victory') {
+      window.location.reload();
+      return;
+    }
+
+    logout();
+    setAuthScreen('login');
+    setNetworkFailure(null);
+  }, [logout, networkFailure, user]);
+
+  const renderNetworkFailurePopup = () => (
+    networkFailure ? (
+      <NetworkFailurePopup
+        resourceLabel={networkFailure.resourceLabel}
+        onExit={handleNetworkFailureExit}
+      />
+    ) : null
+  );
+
   if (isLoading) {
-    return null;
+    return renderNetworkFailurePopup();
   }
 
   if (!user) {
     if (authScreen === 'register') {
-      return <RegisterScreen onGoToLogin={() => setAuthScreen('login')} />;
+      return (
+        <>
+          <RegisterScreen
+            onGoToLogin={() => setAuthScreen('login')}
+            onNetworkFailure={handleNetworkFailure}
+          />
+          {renderNetworkFailurePopup()}
+        </>
+      );
     }
 
-    return <LoginScreen onGoToRegister={() => setAuthScreen('register')} />;
+    if (authScreen === 'forgot-password') {
+      return (
+        <>
+          <ForgotPasswordScreen
+            onGoToLogin={() => setAuthScreen('login')}
+            onNetworkFailure={handleNetworkFailure}
+          />
+          {renderNetworkFailurePopup()}
+        </>
+      );
+    }
+
+    return (
+      <>
+        <LoginScreen
+          onGoToRegister={() => setAuthScreen('register')}
+          onGoToForgotPassword={() => setAuthScreen('forgot-password')}
+          onNetworkFailure={handleNetworkFailure}
+        />
+        {renderNetworkFailurePopup()}
+      </>
+    );
   }
 
   return (
-    <PlayersProvider>
-      <GameContent />
-    </PlayersProvider>
+    <>
+      <PlayersProvider>
+        <GameContent onNetworkFailure={handleNetworkFailure} />
+      </PlayersProvider>
+      {renderNetworkFailurePopup()}
+    </>
   );
 };
 

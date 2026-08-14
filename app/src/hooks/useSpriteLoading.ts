@@ -67,11 +67,15 @@ export function useSpriteLoading(characterIds: string[]): SpriteLoadingState {
         console.log(`📸 [SpriteLoading] Últimas URLs:`, LastSampleUrls);
 
         const total = allUrls.length;
+        if (total === 0) {
+          throw new Error(`Nenhum sprite encontrado para: ${normalizedCharacters.join(', ')}`);
+        }
+
         let loaded = 0;
         let loadedSuccess = 0;
         let loadedError = 0;
 
-        await Promise.all(allUrls.map((url, index) => new Promise<void>((resolve) => {
+        await Promise.all(allUrls.map((url, index) => new Promise<void>((resolve, reject) => {
           if (cancelled) {
             resolve();
             return;
@@ -98,7 +102,7 @@ export function useSpriteLoading(characterIds: string[]): SpriteLoadingState {
             const progress = total > 0 ? loaded / total : 1;
             setState(prev => ({ ...prev, progress }));
             console.error(`❌ [SpriteLoading] Erro ao carregar sprite ${index + 1}/${total}: ${url}`, error);
-            resolve();
+            reject(new Error(`Falha ao carregar sprite ${index + 1}/${total}: ${url}`));
           };
           
           img.src = url;

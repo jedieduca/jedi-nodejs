@@ -1,4 +1,6 @@
 import env from '../config/env';
+import { getBackendEndpoint } from '../config/backend';
+import { ensureOkResponse, isFetchFailure, toNetworkFailureError } from '../utils/networkFailure';
 
 // Flag para ativar modo mock quando não houver servidor
 const USE_MOCK = false; // Altere para false quando tiver um servidor real
@@ -31,13 +33,15 @@ class ApiService {
     let url = '';
     
     if (endpoint === 'news') {
-      url = 'https://memore-net.com/api/JEDI-API/pergunta2/sortearPerguntas';
+      url = getBackendEndpoint('sortearPerguntas');
     } else if (endpoint.startsWith('regra/')) {
       url = 'https://memore-net.com/jogos/trilha/PHP_STI/montaFraseSTIJson.php?'+endpoint.replace('/', '=');
     } else {
       console.log('===> endpoint:', endpoint, 'Não encontrado');
       throw new Error(`endpoint "${endpoint}" não encontrado`);
     }
+
+    const resourceLabel = endpoint === 'news' ? 'NOTÍCIAS' : 'REGRA DA NOTÍCIA';
 
     console.log('===> endpoint:', endpoint, 'Fazendo requisição para:', url);
 
@@ -57,16 +61,21 @@ class ApiService {
 
     try {
       const response = await fetch(url, requestInit);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      ensureOkResponse(response, resourceLabel, url, 'match');
+
+      let responseData: unknown;
+      try {
+        responseData = await response.json();
+      } catch (error) {
+        throw toNetworkFailureError(error, resourceLabel, url, 'match');
       }
-      
-      const responseData = await response.json();
       // console.log('Resposta recebida:', responseData);
       return responseData as T;
     } catch (error) {
       console.error('Falha na requisição:', error);
+      if (isFetchFailure(error)) {
+        throw toNetworkFailureError(error, resourceLabel, url, 'match');
+      }
       throw error;
     }
   }

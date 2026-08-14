@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import './CharacterSelection.css';
-import { getFullVersionInfo, getSimpleVersion } from '../config/version';
+import { getFullVersionInfo, getVersionWithBackend } from '../config/version';
 import { CAMERA_DISTANCE_MAX, CAMERA_DISTANCE_MIN, CAMERA_DISTANCE_STEP } from '../config/camera';
 import { GamePreferences } from '../types/preferences';
 import { PlayerLevel, usePlayers } from '../contexts/PlayersContext';
@@ -684,7 +684,7 @@ const CharacterSelection: React.FC<CharacterSelectionProps> = ({
         textShadow: '2px 2px 4px rgba(0, 0, 0, 1.0)'
       }}>
         <p className="build-info">Build: {getFullVersionInfo()}</p>
-        <p className="version-info">Versão {getSimpleVersion()}</p>      
+        <p className="version-info">Versão {getVersionWithBackend()}</p>      
       </div>
       {(isLoading || loadingError) && (
         <div className="sprite-loading-overlay" role="alert" aria-live="assertive">

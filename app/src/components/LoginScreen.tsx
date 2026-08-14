@@ -1,14 +1,18 @@
 import React, { FormEvent, useMemo, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { getBackendEndpoint } from '../config/backend';
+import { NetworkFailureDetails, isFetchFailure, isNetworkFailureError, toNetworkFailureError } from '../utils/networkFailure';
 import './LoginScreen.css';
 
-const CHANGE_PASSWORD_URL = 'https://memore-net.com/api/JEDI-API/system_user/trocarSenha';
+const CHANGE_PASSWORD_URL = getBackendEndpoint('trocarSenha');
 
 interface LoginScreenProps {
   onGoToRegister?: () => void;
+  onGoToForgotPassword?: () => void;
+  onNetworkFailure?: (details: NetworkFailureDetails) => void;
 }
 
-const LoginScreen: React.FC<LoginScreenProps> = ({ onGoToRegister }) => {
+const LoginScreen: React.FC<LoginScreenProps> = ({ onGoToRegister, onGoToForgotPassword, onNetworkFailure }) => {
   const { login } = useAuth();
   const [loginValue, setLoginValue] = useState('');
   const [password, setPassword] = useState('');
@@ -68,24 +72,40 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onGoToRegister }) => {
     setIsSubmitting(true);
     try {
       if (isTrocarSenha) {
-        const response = await fetch(CHANGE_PASSWORD_URL, {
-          method: 'POST',
-          mode: 'cors',
-          credentials: 'omit',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            login: loginValue.trim(),
-            senhaAntiga: password,
-            senhaNova: novaSenha
-          })
-        });
+        let response: Response;
+        try {
+          response = await fetch(CHANGE_PASSWORD_URL, {
+            method: 'POST',
+            mode: 'cors',
+            credentials: 'omit',
+            headers: {
+              Accept: 'application/json',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              login: loginValue.trim(),
+              senhaAntiga: password,
+              senhaNova: novaSenha
+            })
+          });
+        } catch (error) {
+          if (isFetchFailure(error)) {
+            throw toNetworkFailureError(error, 'TROCA DE SENHA', CHANGE_PASSWORD_URL, 'auth');
+          }
+          throw error;
+        }
 
-        const rawText = (await response.text()).trim();
+        let rawText = '';
+        try {
+          rawText = (await response.text()).trim();
+        } catch (error) {
+          throw toNetworkFailureError(error, 'TROCA DE SENHA', CHANGE_PASSWORD_URL, 'auth');
+        }
 
         if (!response.ok) {
+          if (response.status >= 500) {
+            throw toNetworkFailureError(new Error(`HTTP ${response.status}`), 'TROCA DE SENHA', CHANGE_PASSWORD_URL, 'auth');
+          }
           throw new Error(rawText || `Falha ao trocar senha: HTTP ${response.status}`);
         }
 
@@ -103,6 +123,11 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onGoToRegister }) => {
         await login(loginValue.trim(), password);
       }
     } catch (err) {
+      if (isNetworkFailureError(err)) {
+        onNetworkFailure?.(err);
+        return;
+      }
+
       const message = err instanceof Error
         ? err.message
         : isTrocarSenha
@@ -222,8 +247,15 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onGoToRegister }) => {
 
           <div className="login-screen-footer">
             <span>Esqueceu a senha?</span>
-            <button type="button" className="login-screen-link" >
+            <button type="button" className="login-screen-link" onClick={onGoToForgotPassword}>
               Esqueci a senha
+            </button>
+          </div>
+
+          <div className="register-screen-footer">
+            <span>Usuário novo?</span>
+            <button type="button" className="register-screen-link" onClick={onGoToRegister}>
+              Cadastre-se
             </button>
           </div>
         </form>

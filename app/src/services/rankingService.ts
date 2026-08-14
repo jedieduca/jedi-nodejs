@@ -4,8 +4,10 @@ import {
   RankingEntry,
   RankingRequestPayload
 } from '../types/ranking';
+import { getBackendEndpoint } from '../config/backend';
+import { isFetchFailure, toNetworkFailureError } from '../utils/networkFailure';
 
-const RANKING_URL = 'https://memore-net.com/api/JEDI-API/partidasperguntas/ranking';
+const RANKING_URL = getBackendEndpoint('ranking');
 
 const isRankingApiError = (value: unknown): value is RankingApiError => {
   return Boolean(
@@ -75,18 +77,31 @@ export const buscarRanking = async (idPartida: number | string): Promise<Ranking
     throw new Error('idPartida inválido para consulta do ranking');
   }
 
-  const response = await fetch(RANKING_URL, {
-    method: 'POST',
-    mode: 'cors',
-    credentials: 'omit',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(payload)
-  });
+  let response: Response;
+  try {
+    response = await fetch(RANKING_URL, {
+      method: 'POST',
+      mode: 'cors',
+      credentials: 'omit',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+  } catch (error) {
+    if (isFetchFailure(error)) {
+      throw toNetworkFailureError(error, 'RANKING', RANKING_URL, 'victory');
+    }
+    throw error;
+  }
 
-  const rawText = await response.text();
+  let rawText = '';
+  try {
+    rawText = await response.text();
+  } catch (error) {
+    throw toNetworkFailureError(error, 'RANKING', RANKING_URL, 'victory');
+  }
 
   if (!response.ok) {
     try {
@@ -97,10 +112,14 @@ export const buscarRanking = async (idPartida: number | string): Promise<Ranking
       }
     }
 
-    throw new Error(`Falha ao buscar ranking: HTTP ${response.status}`);
+    throw toNetworkFailureError(new Error(`Falha ao buscar ranking: HTTP ${response.status}`), 'RANKING', RANKING_URL, 'victory');
   }
 
-  return parseRankingResponse(rawText);
+  try {
+    return parseRankingResponse(rawText);
+  } catch (error) {
+    throw toNetworkFailureError(error, 'RANKING', RANKING_URL, 'victory');
+  }
 };
 
 const rankingService = {

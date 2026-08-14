@@ -9,7 +9,7 @@ interface SpeakOptions {
 }
 
 class SpeechService {
-  private synthesis: SpeechSynthesis;
+  private synthesis: SpeechSynthesis | null = null;
   private voices: SpeechSynthesisVoice[] = [];
   private preferredVoiceId: string | null = null;
   private preferredVoice: SpeechSynthesisVoice | null = null;
@@ -19,7 +19,11 @@ class SpeechService {
   private voiceListeners: Set<(voices: SpeechSynthesisVoice[]) => void> = new Set();
 
   constructor() {
-    this.synthesis = window.speechSynthesis;
+    this.synthesis = typeof window !== 'undefined' ? window.speechSynthesis ?? null : null;
+    if (!this.synthesis) {
+      return;
+    }
+
     if (typeof this.synthesis.onvoiceschanged !== 'undefined') {
       this.synthesis.onvoiceschanged = () => this.loadVoices();
     }
@@ -27,6 +31,10 @@ class SpeechService {
   }
 
   private loadVoices(retryCount = 0): void {
+    if (!this.synthesis) {
+      return;
+    }
+
     const voices = this.synthesis.getVoices();
 
     if (!voices || voices.length === 0) {
@@ -69,7 +77,7 @@ class SpeechService {
    * Para a narração atual, se houver
    */
   public stop(): void {
-    if (this.isPlaying) {
+    if (this.isPlaying && this.synthesis) {
       this.synthesis.cancel();
       this.isPlaying = false;
     }
@@ -120,6 +128,11 @@ class SpeechService {
    */
   public speak(text: string, options: SpeakOptions = {}): Promise<void> {
     return new Promise((resolve, reject) => {
+      if (!this.synthesis || typeof SpeechSynthesisUtterance === 'undefined') {
+        reject(new Error('Motor de voz indisponível no momento. Tente novamente.'));
+        return;
+      }
+
       if (!this.isInitialized) {
         this.loadVoices();
         if (!this.isInitialized) {

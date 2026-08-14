@@ -1,5 +1,6 @@
 import apiService from './api';
 import { News, NewsResponse } from '../types/news';
+import { toNetworkFailureError } from '../utils/networkFailure';
 
 /**
  * Serviço para gerenciar dados de notícias
@@ -23,10 +24,10 @@ class NewsService {
     }
 
     if (response && typeof response === 'object' && typeof response.erro === 'string') {
-      return { items: [], message: response.erro };
+      throw new Error(response.erro);
     }
 
-    return { items: [] };
+    throw toNetworkFailureError(new Error('Formato inesperado na resposta de notícias'), 'NOTÍCIAS', 'newsService.normalizeNewsResponse', 'match');
   }
 
   /**
@@ -39,15 +40,14 @@ class NewsService {
       const parsedResponse = typeof response === 'string' ? JSON.parse(response) : response;
       const normalizedResponse = this.normalizeNewsResponse(parsedResponse);
 
-      if (!Array.isArray(normalizedResponse.items)) {
-        console.error('Dados de notícias inválidos:', normalizedResponse);
-        return { items: [] };
+      if (!Array.isArray(normalizedResponse.items) || normalizedResponse.items.length === 0) {
+        throw toNetworkFailureError(new Error('Lista de notícias vazia ou inválida'), 'NOTÍCIAS', 'newsService.getNews', 'match');
       }
 
       return normalizedResponse;
     } catch (error) {
       console.error('Falha ao buscar notícias:', error);
-      return { items: [] };
+      throw error;
     }
   }
 

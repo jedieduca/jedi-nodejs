@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback, useRef, useImperativeHandle, f
 import './IsometricBoard.css';
 import { useResponsiveIsometric } from '../hooks/useResponsiveIsometric';
 import { useCameraControl } from '../hooks/useCameraControl';
+import { NetworkFailureDetails } from '../utils/networkFailure';
 import tileFundoSrc from '../assets/tiles/fundo.png';
 import tileCaminhoSrc from '../assets/tiles/caminho.png';
 import tileInicioSrc from '../assets/tiles/inicio.png';
@@ -51,6 +52,7 @@ interface IsometricBoardProps {
     centerOnPlayer: (playerScreenPosition: ScreenPosition, duration?: number) => Promise<void>;
     resetCamera: (duration?: number) => Promise<void>;
   }) => void;
+  onResourceLoadError?: (details: NetworkFailureDetails) => void;
   
   // NOVO: Props para zoom dinâmico
   dynamicZoomFactor?: number; // Fator de zoom atual
@@ -71,6 +73,7 @@ const IsometricBoard = forwardRef<IsometricBoardRef, IsometricBoardProps>(({
   containerRef,
   children,
   onCameraReady, // NOVO: prop para callback de câmera
+  onResourceLoadError,
   dynamicZoomFactor = 1 // NOVO: fator de zoom dinâmico (padrão: cenario aberto)
 }, ref) => {
   const [tiles, setTiles] = useState<Tile[]>([]);
@@ -127,13 +130,19 @@ const IsometricBoard = forwardRef<IsometricBoardRef, IsometricBoardProps>(({
     img.onerror = () => {
       if (cancelled) return;
       setStageDimensions({ width: WORLD_WIDTH, height: WORLD_HEIGHT });
+      onResourceLoadError?.({
+        resourceLabel: 'CENÁRIO DO JOGO',
+        context: 'match',
+        source: 'IsometricBoard.backgroundImage',
+        cause: backgroundImageUrl
+      });
     };
     img.src = backgroundImageUrl;
 
     return () => {
       cancelled = true;
     };
-  }, [backgroundImageUrl, WORLD_WIDTH, WORLD_HEIGHT]);
+  }, [backgroundImageUrl, WORLD_WIDTH, WORLD_HEIGHT, onResourceLoadError]);
 
 
   // Hook para controle de câmera (definido após derivar centro)
@@ -318,6 +327,9 @@ const IsometricBoard = forwardRef<IsometricBoardRef, IsometricBoardProps>(({
       try {
         console.log('Carregando mapa...');
         const response = await fetch('/mapa.map');
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
         const mapData = await response.text();
         const { parsedTiles, startPos, tiabelPos } = parseMapData(mapData);
         
@@ -343,12 +355,18 @@ const IsometricBoard = forwardRef<IsometricBoardRef, IsometricBoardProps>(({
         setLoading(false);
       } catch (error) {
         console.error('Erro ao carregar o mapa:', error);
+        onResourceLoadError?.({
+          resourceLabel: 'MAPA',
+          context: 'match',
+          source: 'IsometricBoard.loadMapData',
+          cause: error
+        });
         setLoading(false);
       }
     };
 
     loadMapData();
-  }, [onMapLoaded, getIsoPosition]);
+  }, [onMapLoaded, getIsoPosition, onResourceLoadError]);
 
   const parseMapData = (data: string): { parsedTiles: Tile[], startPos: Position, tiabelPos: Position } => {
     // Seção de tiles (mantém espaços por coluna)

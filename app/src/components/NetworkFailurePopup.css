@@ -1,0 +1,55 @@
+.network-failure-popup-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.72);
+}
+
+.network-failure-popup {
+  width: min(520px, 100%);
+  border: 3px solid #f9d65c;
+  border-radius: 18px;
+  padding: 28px;
+  background: #101725;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
+  color: #ffffff;
+  text-align: center;
+}
+
+.network-failure-popup-title {
+  margin: 0 0 18px;
+  color: #f9d65c;
+  font-size: 1.8rem;
+}
+
+.network-failure-popup-message {
+  margin: 0;
+  white-space: pre-line;
+  font-size: 1.1rem;
+  line-height: 1.55;
+}
+
+.network-failure-popup-exit-button {
+  margin-top: 28px;
+  border: none;
+  border-radius: 999px;
+  padding: 14px 38px;
+  background: #f04b4b;
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.network-failure-popup-exit-button:hover {
+  background: #ff6262;
+}
+
+.network-failure-popup-exit-button:focus-visible {
+  outline: 3px solid #ffffff;
+  outline-offset: 4px;
+}

@@ -1,17 +1,18 @@
 import React, { FormEvent, useMemo, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import authService from '../services/authService';
+import { NetworkFailureDetails, isNetworkFailureError } from '../utils/networkFailure';
 import './RegisterScreen.css';
 
 interface RegisterScreenProps {
   onGoToLogin?: () => void;
+  onNetworkFailure?: (details: NetworkFailureDetails) => void;
 }
 
-const RegisterScreen: React.FC<RegisterScreenProps> = ({ onGoToLogin }) => {
+const RegisterScreen: React.FC<RegisterScreenProps> = ({ onGoToLogin, onNetworkFailure }) => {
   const { login } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [nascimento, setNascimento] = useState('');
   const [loginValue, setLoginValue] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -23,12 +24,11 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ onGoToLogin }) => {
       isSubmitting ||
       !name.trim() ||
       !email.trim() ||
-      !nascimento.trim() ||
       !loginValue.trim() ||
       !password.trim() ||
       !confirmPassword.trim()
     );
-  }, [isSubmitting, name, email, nascimento, loginValue, password, confirmPassword]);
+  }, [isSubmitting, name, email, loginValue, password, confirmPassword]);
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -47,15 +47,19 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ onGoToLogin }) => {
     setIsSubmitting(true);
     try {
       await authService.cadastrar({
-        name: name.trim(),
-        nascimento,
+        nome: name.trim(),
         login: loginValue.trim(),
         email: email.trim(),
-        password
+        senha: password
       });
 
       await login(loginValue.trim(), password);
     } catch (err) {
+      if (isNetworkFailureError(err)) {
+        onNetworkFailure?.(err);
+        return;
+      }
+
       const message = err instanceof Error ? err.message : 'Falha ao cadastrar. Tente novamente.';
       setError(message);
     } finally {
@@ -94,7 +98,10 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ onGoToLogin }) => {
             type="text"
             placeholder="Como quer ser chamado?"
             value={name}
-            onChange={(event) => setName(event.target.value)}
+            onChange={(event) => {
+              setName(event.target.value);
+              setError(null);
+            }}
             autoComplete="name"
           />
 
@@ -104,16 +111,11 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ onGoToLogin }) => {
             type="email"
             placeholder="seu@email.com"
             value={email}
-            onChange={(event) => setEmail(event.target.value)}
+            onChange={(event) => {
+              setEmail(event.target.value);
+              setError(null);
+            }}
             autoComplete="email"
-          />
-
-          <label htmlFor="register-date">Data de Nascimento</label>
-          <input
-            id="register-date"
-            type="date"
-            value={nascimento}
-            onChange={(event) => setNascimento(event.target.value)}
           />
 
           <label htmlFor="register-login">Login</label>
@@ -122,7 +124,10 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ onGoToLogin }) => {
             type="text"
             placeholder="Digite seu login"
             value={loginValue}
-            onChange={(event) => setLoginValue(event.target.value)}
+            onChange={(event) => {
+              setLoginValue(event.target.value);
+              setError(null);
+            }}
             autoComplete="username"
           />
 
@@ -132,7 +137,10 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ onGoToLogin }) => {
             type="password"
             placeholder="Digite sua senha"
             value={password}
-            onChange={(event) => setPassword(event.target.value)}
+            onChange={(event) => {
+              setPassword(event.target.value);
+              setError(null);
+            }}
             autoComplete="new-password"
           />
 
@@ -142,7 +150,10 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ onGoToLogin }) => {
             type="password"
             placeholder="Confirme sua senha"
             value={confirmPassword}
-            onChange={(event) => setConfirmPassword(event.target.value)}
+            onChange={(event) => {
+              setConfirmPassword(event.target.value);
+              setError(null);
+            }}
             autoComplete="new-password"
           />
 

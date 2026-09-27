@@ -463,7 +463,7 @@ const CharacterSelection: React.FC<CharacterSelectionProps> = ({
           </div>
           
           <div className="autoavaliacao">
-            <p className="autoavaliacao-title">Autoavaliação (obrigatório):</p>
+            <p className="autoavaliacao-title">Qual você acha que é a sua capacidade em reconhecer notícias falsas? <br/> Sua resposta não vai influenciar na dificuldade das notícias. (obrigatório):</p>
             <div className="autoavaliacao-options" role="radiogroup" aria-label="Nível do jogador">
               {playerLevelOptions.map((option) => (
                 <label key={option.value} className={`autoavaliacao-option ${playerLevel === option.value ? 'selected' : ''}`}>

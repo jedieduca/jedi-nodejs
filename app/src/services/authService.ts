@@ -12,7 +12,17 @@ export const RECOVER_PASSWORD_SUCCESS_MESSAGE =
 export const RECOVER_PASSWORD_ERROR_MESSAGE =
   'Não foi possível encaminhar a solicitação de recuperação de senha neste momento. Tente mais tarde!';
 
-const isAuthError = (data: any): data is AuthError => {
+export const REGISTER_EMAIL_IN_USE_MESSAGE = 'Este e-mail já está cadastrado. Faça login ou recupere sua senha.';
+export const REGISTER_LOGIN_IN_USE_MESSAGE = 'Este login já está em uso. Escolha outro.';
+export const REGISTER_GENERIC_ERROR_MESSAGE = 'Não foi possível cadastrar o usuário. Tente novamente.';
+
+// Códigos de "resposta" devolvidos por system_user/cadastrar
+const REGISTER_ERROR_MESSAGES: Record<number, string> = {
+  0: REGISTER_EMAIL_IN_USE_MESSAGE,
+  2: REGISTER_LOGIN_IN_USE_MESSAGE
+};
+
+const isAuthError =(data: any): data is AuthError => {
   return data && typeof data === 'object' && typeof data.erro === 'string';
 };
 
@@ -194,7 +204,7 @@ export const cadastrar = async (payload: RegisterPayload): Promise<void> => {
   }
 
   if (data.resposta !== 1) {
-    throw new Error('Não foi possível cadastrar o usuário. Tente novamente.');
+    throw new Error(REGISTER_ERROR_MESSAGES[data.resposta] ?? REGISTER_GENERIC_ERROR_MESSAGE);
   }
 };
 

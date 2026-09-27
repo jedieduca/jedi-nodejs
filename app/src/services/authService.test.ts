@@ -1,5 +1,12 @@
 import { NetworkFailureError } from '../utils/networkFailure';
-import { RECOVER_PASSWORD_ERROR_MESSAGE, cadastrar, recuperarSenha } from './authService';
+import {
+  RECOVER_PASSWORD_ERROR_MESSAGE,
+  REGISTER_EMAIL_IN_USE_MESSAGE,
+  REGISTER_GENERIC_ERROR_MESSAGE,
+  REGISTER_LOGIN_IN_USE_MESSAGE,
+  cadastrar,
+  recuperarSenha
+} from './authService';
 
 const REGISTER_URL = 'https://api2.jedieduca.com.br/api/system_user/cadastrar';
 const RECOVER_PASSWORD_URL = 'https://api2.jedieduca.com.br/api/system_user/recuperarSenha';
@@ -51,7 +58,7 @@ describe('authService.cadastrar', () => {
     });
   });
 
-  it('throws a business error when the API returns resposta 0', async () => {
+  it('throws the e-mail in use error when the API returns resposta 0', async () => {
     fetchMock.mockResolvedValue(mockJsonResponse({ resposta: 0 }));
 
     await expect(cadastrar({
@@ -59,7 +66,29 @@ describe('authService.cadastrar', () => {
       senha: '1234',
       login: 'user01',
       email: 'user01@teste.com'
-    })).rejects.toThrow('Não foi possível cadastrar o usuário. Tente novamente.');
+    })).rejects.toThrow(REGISTER_EMAIL_IN_USE_MESSAGE);
+  });
+
+  it('throws the login in use error when the API returns resposta 2', async () => {
+    fetchMock.mockResolvedValue(mockJsonResponse({ resposta: 2 }));
+
+    await expect(cadastrar({
+      nome: 'Usuário Cadastro 1',
+      senha: '1234',
+      login: 'user01',
+      email: 'user01@teste.com'
+    })).rejects.toThrow(REGISTER_LOGIN_IN_USE_MESSAGE);
+  });
+
+  it('throws the generic error when the API returns an unknown resposta', async () => {
+    fetchMock.mockResolvedValue(mockJsonResponse({ resposta: 99 }));
+
+    await expect(cadastrar({
+      nome: 'Usuário Cadastro 1',
+      senha: '1234',
+      login: 'user01',
+      email: 'user01@teste.com'
+    })).rejects.toThrow(REGISTER_GENERIC_ERROR_MESSAGE);
   });
 
   it('throws NetworkFailureError when fetch fails', async () => {

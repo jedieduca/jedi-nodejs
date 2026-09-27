@@ -372,6 +372,7 @@ const GameContent: React.FC<GameContentProps> = ({ onNetworkFailure }) => {
   
   // Usando useRef para manter uma referência estável das notícias
   const newsRef = useRef<News[]>([]);
+  const autoStartFirstNewsRef = useRef<boolean>(false);
   
   // Estado local para UI e sincronização
   const [currentNews, setCurrentNews] = useState<News | null>(null);
@@ -1486,7 +1487,9 @@ const GameContent: React.FC<GameContentProps> = ({ onNetworkFailure }) => {
     });
     // Não enviar resumo da partida *DEBUG* (2 de 4)
     enviarResumoPartida();
-    
+
+    // Primeira notícia da partida é exibida automaticamente, sem clicar em "Próxima Notícia"
+    autoStartFirstNewsRef.current = true;
     dispatchGameEvent({ type: 'INICIAR_JOGO' });
     console.log('✅ [GameStart] Evento INICIAR_JOGO disparado');
     
@@ -3404,6 +3407,22 @@ const GameContent: React.FC<GameContentProps> = ({ onNetworkFailure }) => {
     }
   }, [gameState]);
 
+  // Início da partida: avança para a primeira notícia sem exigir o clique em "Próxima Notícia".
+  // Aguarda a lista de notícias estar carregada para não disparar falha de rede prematura.
+  useEffect(() => {
+    if (!autoStartFirstNewsRef.current || gameState !== 'AguardandoProximaNoticia') {
+      return;
+    }
+    if (loadingNews || !initialNews || initialNews.length === 0) {
+      return;
+    }
+
+    autoStartFirstNewsRef.current = false;
+    newsRef.current = initialNews;
+    console.log('[FSM] Início da partida: exibindo primeira notícia automaticamente');
+    handleNextNewsClick();
+  }, [gameState, loadingNews, initialNews, handleNextNewsClick]);
+
   const playersRef = useRef(players);
   const nextTurnRef = useRef(nextTurn);
 
@@ -3523,7 +3542,7 @@ const GameContent: React.FC<GameContentProps> = ({ onNetworkFailure }) => {
             </div>
             <div className="airport-panel-footer">
               <div className="rolling-text">
-                <span>Jogos Educacionais Digitais inteligentes é com a Edu4Up</span>
+                <span>Jogos Educacionais Digitais inteligentes</span>
                 <span></span>
                 <span>Fato ou Fake? Aprenda a diferenciar com a JEDi Educa</span>
               </div>

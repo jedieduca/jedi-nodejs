@@ -4,12 +4,16 @@ import {
   REGISTER_EMAIL_IN_USE_MESSAGE,
   REGISTER_GENERIC_ERROR_MESSAGE,
   REGISTER_LOGIN_IN_USE_MESSAGE,
+  RESET_PASSWORD_ERROR_MESSAGE,
   cadastrar,
-  recuperarSenha
+  recuperarSenha,
+  redefinirSenha
 } from './authService';
 
 const REGISTER_URL = 'https://api2.jedieduca.com.br/api/system_user/cadastrar';
 const RECOVER_PASSWORD_URL = 'https://api2.jedieduca.com.br/api/system_user/recuperarSenha';
+const RESET_PASSWORD_URL = 'https://api2.jedieduca.com.br/api/system_user/redefinirSenha';
+const RESET_TOKEN = 'a'.repeat(64);
 
 const mockJsonResponse = (body: unknown, ok = true, status = 200): Response => ({
   ok,
@@ -211,6 +215,80 @@ describe('authService.recuperarSenha', () => {
     })).rejects.toMatchObject({
       resourceLabel: 'RECUPERAÇÃO DE SENHA',
       source: RECOVER_PASSWORD_URL,
+      context: 'auth'
+    });
+  });
+});
+
+describe('authService.redefinirSenha', () => {
+  const fetchMock = jest.fn();
+
+  beforeEach(() => {
+    fetchMock.mockReset();
+    global.fetch = fetchMock as unknown as typeof fetch;
+  });
+
+  it('posts the token and the new password to the Jedieduca endpoint', async () => {
+    fetchMock.mockResolvedValue(mockJsonResponse({ resposta: 1 }));
+
+    await expect(redefinirSenha({
+      token: RESET_TOKEN,
+      senha: 'novaSenha123'
+    })).resolves.toBeUndefined();
+
+    expect(fetchMock).toHaveBeenCalledWith(RESET_PASSWORD_URL, {
+      method: 'POST',
+      mode: 'cors',
+      credentials: 'omit',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        token: RESET_TOKEN,
+        senha: 'novaSenha123'
+      })
+    });
+  });
+
+  it('shows the message returned by the API for an invalid or expired link', async () => {
+    fetchMock.mockResolvedValue(mockJsonResponse({
+      erro: 'Este link de redefinição de senha é inválido ou expirou. Solicite um novo.'
+    }, false, 400));
+
+    await expect(redefinirSenha({
+      token: RESET_TOKEN,
+      senha: 'novaSenha123'
+    })).rejects.toEqual(new Error('Este link de redefinição de senha é inválido ou expirou. Solicite um novo.'));
+  });
+
+  it('throws the generic error when the API returns resposta 0', async () => {
+    fetchMock.mockResolvedValue(mockJsonResponse({ resposta: 0 }));
+
+    await expect(redefinirSenha({
+      token: RESET_TOKEN,
+      senha: 'novaSenha123'
+    })).rejects.toThrow(RESET_PASSWORD_ERROR_MESSAGE);
+  });
+
+  it('reports an unexpected server payload as a regular error', async () => {
+    fetchMock.mockResolvedValue(mockJsonResponse({ status: 'ok' }));
+
+    await expect(redefinirSenha({
+      token: RESET_TOKEN,
+      senha: 'novaSenha123'
+    })).rejects.toThrow('Formato de resposta inesperado na redefinição de senha.');
+  });
+
+  it('throws NetworkFailureError when fetch fails', async () => {
+    fetchMock.mockRejectedValue(new TypeError('Failed to fetch'));
+
+    await expect(redefinirSenha({
+      token: RESET_TOKEN,
+      senha: 'novaSenha123'
+    })).rejects.toMatchObject({
+      resourceLabel: 'REDEFINIÇÃO DE SENHA',
+      source: RESET_PASSWORD_URL,
       context: 'auth'
     });
   });

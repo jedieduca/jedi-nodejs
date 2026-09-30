@@ -8,7 +8,7 @@ import { NetworkFailureError } from '../utils/networkFailure';
 jest.mock('../services/authService', () => ({
   __esModule: true,
   RECOVER_PASSWORD_SUCCESS_MESSAGE:
-    'Solicitação de recuperação de senha encaminhada com sucesso. Se o e-mail estiver cadastrado, você receberá a nova senha nesse e-mail.',
+    'Solicitação de recuperação de senha encaminhada com sucesso. Se o e-mail estiver cadastrado, você receberá um link para criar uma nova senha. O link é válido por 60 minutos.',
   default: {
     recuperarSenha: jest.fn()
   }

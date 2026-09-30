@@ -37,6 +37,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import LoginScreen from './components/LoginScreen';
 import RegisterScreen from './components/RegisterScreen';
 import ForgotPasswordScreen from './components/ForgotPasswordScreen';
+import ResetPasswordScreen from './components/ResetPasswordScreen';
 import partidaService from './services/partidaService';
 import { ResumoPartida, ResumoPartidaJogada } from './types/partida';
 import rankingService from './services/rankingService';
@@ -4168,10 +4169,28 @@ const GameContent: React.FC<GameContentProps> = ({ onNetworkFailure }) => {
 
 };
 
+const RESET_TOKEN_PARAM = 'resetToken';
+
+// Lê o token do link de redefinição de senha enviado por e-mail
+const readResetTokenFromUrl = (): string | null => {
+  const token = new URLSearchParams(window.location.search).get(RESET_TOKEN_PARAM);
+  return token && /^[a-f0-9]{64}$/.test(token) ? token : null;
+};
+
 const AppContent: React.FC = () => {
   const { user, isLoading, logout } = useAuth();
   const [authScreen, setAuthScreen] = useState<'login' | 'register' | 'forgot-password'>('login');
+  const [resetToken, setResetToken] = useState<string | null>(readResetTokenFromUrl);
   const [networkFailure, setNetworkFailure] = useState<NetworkFailureDetails | null>(null);
+
+  // Remove o token da barra de endereço (histórico, favoritos, cabeçalho Referer)
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (url.searchParams.has(RESET_TOKEN_PARAM)) {
+      url.searchParams.delete(RESET_TOKEN_PARAM);
+      window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`);
+    }
+  }, []);
 
   useEffect(() => {
     if (user) {
@@ -4208,6 +4227,29 @@ const AppContent: React.FC = () => {
 
   if (isLoading) {
     return renderNetworkFailurePopup();
+  }
+
+  // O link de redefinição tem prioridade, inclusive sobre uma sessão já aberta no aparelho
+  if (resetToken) {
+    const finishReset = (nextScreen: 'login' | 'forgot-password') => {
+      setResetToken(null);
+      if (user) {
+        logout();
+      }
+      setAuthScreen(nextScreen);
+    };
+
+    return (
+      <>
+        <ResetPasswordScreen
+          token={resetToken}
+          onGoToLogin={() => finishReset('login')}
+          onRequestNewLink={() => finishReset('forgot-password')}
+          onNetworkFailure={handleNetworkFailure}
+        />
+        {renderNetworkFailurePopup()}
+      </>
+    );
   }
 
   if (!user) {

@@ -17,6 +17,7 @@ type StaticBackendEndpointName =
   | 'cadastrarUsuario'
   | 'trocarSenha'
   | 'recuperarSenha'
+  | 'redefinirSenha'
   | 'salvarPartida'
   | 'listarPartidasAgrupadas'
   | 'listarCategorias';
@@ -36,7 +37,8 @@ type BackendConfig = {
 };
 
 const MEMORE_API_BASE_URL = 'https://memore-net.com/api/JEDI-API';
-const JEDIEDUCA_API_BASE_URL = 'https://api2.jedieduca.com.br/api';
+// Definida por ambiente em app/.env.local (ignorado pelo git); sem ela, usa a API de produção
+const JEDIEDUCA_API_BASE_URL = (process.env.REACT_APP_JEDIEDUCA_API_URL || 'https://api2.jedieduca.com.br/api').replace(/\/+$/, '');
 
 const buildEndpoint = (baseUrl: string, path: string): string => {
   return `${baseUrl}/${path}`;
@@ -59,6 +61,7 @@ const BACKEND_CONFIGS: Record<BackendId, BackendConfig> = {
       cadastrarUsuario: buildEndpoint(MEMORE_API_BASE_URL, 'system_user/cadastrar'),
       trocarSenha: buildEndpoint(MEMORE_API_BASE_URL, 'system_user/trocarSenha'),
       recuperarSenha: undefined,
+      redefinirSenha: undefined,
       salvarPartida: buildEndpoint(MEMORE_API_BASE_URL, 'partidasperguntas/salvarPartida'),
       listarPartida: (partidaId) =>
         buildEndpointWithId(MEMORE_API_BASE_URL, 'partidasperguntas/listarPartida', partidaId),
@@ -82,6 +85,7 @@ const BACKEND_CONFIGS: Record<BackendId, BackendConfig> = {
       cadastrarUsuario: buildEndpoint(JEDIEDUCA_API_BASE_URL, 'system_user/cadastrar'),
       trocarSenha: buildEndpoint(JEDIEDUCA_API_BASE_URL, 'system_user/trocarSenha'),
       recuperarSenha: buildEndpoint(JEDIEDUCA_API_BASE_URL, 'system_user/recuperarSenha'),
+      redefinirSenha: buildEndpoint(JEDIEDUCA_API_BASE_URL, 'system_user/redefinirSenha'),
       salvarPartida: buildEndpoint(JEDIEDUCA_API_BASE_URL, 'partidasperguntas/salvarPartida'),
       listarPartida: (partidaId) =>
         buildEndpointWithId(JEDIEDUCA_API_BASE_URL, 'partidasperguntas/listarPartida', partidaId),

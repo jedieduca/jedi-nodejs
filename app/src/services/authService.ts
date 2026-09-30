@@ -5,12 +5,18 @@ import { isFetchFailure, toNetworkFailureError } from '../utils/networkFailure';
 const AUTH_URL = getBackendEndpoint('autenticar');
 const REGISTER_URL = getBackendEndpoint('cadastrarUsuario');
 const RECOVER_PASSWORD_URL = getBackendEndpoint('recuperarSenha');
+const RESET_PASSWORD_URL = getBackendEndpoint('redefinirSenha');
+
+export const PASSWORD_MIN_LENGTH = 8;
 
 export const RECOVER_PASSWORD_SUCCESS_MESSAGE =
-  'Solicitação de recuperação de senha encaminhada com sucesso. Se o e-mail estiver cadastrado, você receberá a nova senha nesse e-mail.';
+  'Solicitação de recuperação de senha encaminhada com sucesso. Se o e-mail estiver cadastrado, você receberá um link para criar uma nova senha. O link é válido por 60 minutos.';
 
 export const RECOVER_PASSWORD_ERROR_MESSAGE =
   'Não foi possível encaminhar a solicitação de recuperação de senha neste momento. Tente mais tarde!';
+
+export const RESET_PASSWORD_SUCCESS_MESSAGE = 'Senha alterada com sucesso! Faça login com a nova senha.';
+export const RESET_PASSWORD_ERROR_MESSAGE = 'Não foi possível redefinir a senha neste momento. Tente novamente.';
 
 export const REGISTER_EMAIL_IN_USE_MESSAGE = 'Este e-mail já está cadastrado. Faça login ou recupere sua senha.';
 export const REGISTER_LOGIN_IN_USE_MESSAGE = 'Este login já está em uso. Escolha outro.';
@@ -246,10 +252,51 @@ export const recuperarSenha = async (payload: RecoverPasswordPayload): Promise<v
   }
 };
 
+export interface ResetPasswordPayload {
+  token: string;
+  senha: string;
+}
+
+export const redefinirSenha = async (payload: ResetPasswordPayload): Promise<void> => {
+  let response: Response;
+  try {
+    response = await fetch(RESET_PASSWORD_URL, {
+      method: 'POST',
+      mode: 'cors',
+      credentials: 'omit',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        token: payload.token,
+        senha: payload.senha
+      })
+    });
+  } catch (error) {
+    if (isFetchFailure(error)) {
+      throw toNetworkFailureError(error, 'REDEFINIÇÃO DE SENHA', RESET_PASSWORD_URL, 'auth');
+    }
+    throw error;
+  }
+
+  const data = await readResponsePayload(response);
+  throwServerResponseError(response, data);
+
+  if (!isStatusResponse(data)) {
+    throw new Error('Formato de resposta inesperado na redefinição de senha.');
+  }
+
+  if (data.resposta !== 1) {
+    throw new Error(RESET_PASSWORD_ERROR_MESSAGE);
+  }
+};
+
 const authService = {
   autenticar,
   cadastrar,
-  recuperarSenha
+  recuperarSenha,
+  redefinirSenha
 };
 
 export default authService;

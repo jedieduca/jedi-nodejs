@@ -33,3 +33,30 @@ describe('App authentication screens', () => {
     expect(screen.getByText(/Bem-vindo ao JEDi Educa/i)).toBeInTheDocument();
   });
 });
+
+describe('App password reset link', () => {
+  beforeEach(() => {
+    window.localStorage.clear();
+  });
+
+  afterEach(() => {
+    window.history.replaceState(null, '', '/');
+  });
+
+  it('opens the reset screen and removes the token from the address bar', () => {
+    window.history.replaceState(null, '', `/?resetToken=${'c'.repeat(64)}`);
+
+    render(<App />);
+
+    expect(screen.getByText(/Criar nova senha/i)).toBeInTheDocument();
+    expect(window.location.search).not.toContain('resetToken');
+  });
+
+  it('ignores a malformed reset token', () => {
+    window.history.replaceState(null, '', '/?resetToken=invalido');
+
+    render(<App />);
+
+    expect(screen.getByText(/Bem-vindo ao JEDi Educa/i)).toBeInTheDocument();
+  });
+});

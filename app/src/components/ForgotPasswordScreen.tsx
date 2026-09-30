@@ -73,7 +73,7 @@ const ForgotPasswordScreen: React.FC<ForgotPasswordScreenProps> = ({ onGoToLogin
             />
           </div>
           <h1>Recuperar senha</h1>
-          <p>Informe seu e-mail para solicitar uma nova senha.</p>
+          <p>Informe seu e-mail para receber um link de criação de nova senha.</p>
         </div>
 
         <form className="forgot-password-screen-form" onSubmit={handleSubmit}>

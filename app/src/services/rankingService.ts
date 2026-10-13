@@ -2,12 +2,17 @@ import {
   RankingApiEntryRaw,
   RankingApiError,
   RankingEntry,
-  RankingRequestPayload
+  RankingRequestPayload,
+  RankingTipo
 } from '../types/ranking';
 import { getBackendEndpoint } from '../config/backend';
 import { isFetchFailure, toNetworkFailureError } from '../utils/networkFailure';
 
-const RANKING_URL = getBackendEndpoint('ranking');
+const RANKING_ENDPOINTS: Record<RankingTipo, 'ranking' | 'rankingEscola' | 'rankingTurma'> = {
+  global: 'ranking',
+  escola: 'rankingEscola',
+  turma: 'rankingTurma'
+};
 
 const isRankingApiError = (value: unknown): value is RankingApiError => {
   return Boolean(
@@ -68,7 +73,11 @@ const parseRankingResponse = (rawText: string): RankingEntry[] => {
   return parsed.map((entry) => normalizeRankingEntry(entry as RankingApiEntryRaw));
 };
 
-export const buscarRanking = async (idPartida: number | string): Promise<RankingEntry[]> => {
+export const buscarRanking = async (
+  idPartida: number | string,
+  tipo: RankingTipo = 'global'
+): Promise<RankingEntry[]> => {
+  const RANKING_URL = getBackendEndpoint(RANKING_ENDPOINTS[tipo]);
   const payload: RankingRequestPayload = {
     idPartida: Number.parseInt(String(idPartida), 10)
   };

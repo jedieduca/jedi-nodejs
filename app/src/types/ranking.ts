@@ -33,3 +33,5 @@ export interface RankingEntry {
 }
 
 export type VictoryRankingStatus = 'idle' | 'loading' | 'success' | 'error';
+
+export type RankingTipo = 'global' | 'escola' | 'turma';

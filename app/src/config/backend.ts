@@ -55,8 +55,8 @@ const BACKEND_CONFIGS: Record<BackendId, BackendConfig> = {
     endpoints: {
       sortearPerguntas: buildEndpoint(MEMORE_API_BASE_URL, 'pergunta2/sortearPerguntas'),
       ranking: buildEndpoint(MEMORE_API_BASE_URL, 'partidasperguntas/ranking'),
-      rankingEscola: buildEndpoint(MEMORE_API_BASE_URL, 'partidasperguntas/ranking-escola'),
-      rankingTurma: buildEndpoint(MEMORE_API_BASE_URL, 'partidasperguntas/ranking-turma'),
+      rankingEscola: buildEndpoint(MEMORE_API_BASE_URL, 'partidasperguntas/rankingEscola'),
+      rankingTurma: buildEndpoint(MEMORE_API_BASE_URL, 'partidasperguntas/rankingTurma'),
       autenticar: buildEndpoint(MEMORE_API_BASE_URL, 'system_user/autenticar'),
       cadastrarUsuario: buildEndpoint(MEMORE_API_BASE_URL, 'system_user/cadastrar'),
       trocarSenha: buildEndpoint(MEMORE_API_BASE_URL, 'system_user/trocarSenha'),
@@ -79,8 +79,8 @@ const BACKEND_CONFIGS: Record<BackendId, BackendConfig> = {
     endpoints: {
       sortearPerguntas: buildEndpoint(JEDIEDUCA_API_BASE_URL, 'pergunta2/sortearPerguntas'),
       ranking: buildEndpoint(JEDIEDUCA_API_BASE_URL, 'partidasperguntas/ranking'),
-      rankingEscola: buildEndpoint(JEDIEDUCA_API_BASE_URL, 'partidasperguntas/ranking-escola'),
-      rankingTurma: buildEndpoint(JEDIEDUCA_API_BASE_URL, 'partidasperguntas/ranking-turma'),
+      rankingEscola: buildEndpoint(JEDIEDUCA_API_BASE_URL, 'partidasperguntas/rankingEscola'),
+      rankingTurma: buildEndpoint(JEDIEDUCA_API_BASE_URL, 'partidasperguntas/rankingTurma'),
       autenticar: buildEndpoint(JEDIEDUCA_API_BASE_URL, 'system_user/autenticar'),
       cadastrarUsuario: buildEndpoint(JEDIEDUCA_API_BASE_URL, 'system_user/cadastrar'),
       trocarSenha: buildEndpoint(JEDIEDUCA_API_BASE_URL, 'system_user/trocarSenha'),

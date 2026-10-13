@@ -41,11 +41,11 @@ import ResetPasswordScreen from './components/ResetPasswordScreen';
 import partidaService from './services/partidaService';
 import { ResumoPartida, ResumoPartidaJogada } from './types/partida';
 import rankingService from './services/rankingService';
-import { RankingEntry, VictoryRankingStatus } from './types/ranking';
+import { RankingEntry, RankingTipo, VictoryRankingStatus } from './types/ranking';
 import VictoryPanel from './components/VictoryPanel';
 import { getHelpContentByType } from './config/helpTexts';
 import NetworkFailurePopup from './components/NetworkFailurePopup';
-import { NetworkFailureDetails, preloadRequiredImage } from './utils/networkFailure';
+import { NetworkFailureDetails, isNetworkFailureError, preloadRequiredImage } from './utils/networkFailure';
 import { diceAssetUrls, evaluationButtonAssetUrls } from './config/criticalAssets';
 
 // MODIFICAÇÃO: Estados de zoom removidos (AguardandoZoomIn, AnimacaoZoomIn, AguardandoZoomOut, AnimacaoZoomOut)
@@ -402,6 +402,7 @@ const GameContent: React.FC<GameContentProps> = ({ onNetworkFailure }) => {
   const [victoryRankingCurrentPlayerEntry, setVictoryRankingCurrentPlayerEntry] = useState<RankingEntry | null>(null);
   const [victoryRankingErrorMessage, setVictoryRankingErrorMessage] = useState<string | null>(null);
   const [victoryPanelLoadNonce, setVictoryPanelLoadNonce] = useState<number>(0);
+  const [victoryRankingTipo, setVictoryRankingTipo] = useState<RankingTipo>('global');
   const [showExplanationPanel, setShowExplanationPanel] = useState<boolean>(false);
   const [helpPopupType, setHelpPopupType] = useState<string | null>(null);
   const [newsContentReady, setNewsContentReady] = useState<boolean>(true);
@@ -561,7 +562,7 @@ const GameContent: React.FC<GameContentProps> = ({ onNetworkFailure }) => {
     }
   }, []);
 
-  const carregarRankingDaVitoria = useCallback(async (requestId: number) => {
+  const carregarRankingDaVitoria = useCallback(async (requestId: number, tipo: RankingTipo) => {
     setVictoryRankingStatus('loading');
     setVictoryRankingErrorMessage(null);
     setVictoryRankingTopEntries([]);
@@ -581,10 +582,13 @@ const GameContent: React.FC<GameContentProps> = ({ onNetworkFailure }) => {
         id: idPartida
       };
 
-      // Esperar 1 segundo antes de buscar o ranking
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Esperar 1 segundo antes de buscar o ranking global (primeira carga, logo após salvar a partida);
+      // escola e turma só são escolhidas depois, com a partida já salva
+      if (tipo === 'global') {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
 
-      let rankingEntries = await rankingService.buscarRanking(idPartida);
+      let rankingEntries = await rankingService.buscarRanking(idPartida, tipo);
       console.log('🔍 **** [Ranking][App] 🔍 Ranking buscado:', rankingEntries);
 
       if (victoryPanelRequestRef.current !== requestId) {
@@ -612,6 +616,12 @@ const GameContent: React.FC<GameContentProps> = ({ onNetworkFailure }) => {
       console.error('[VictoryRanking] ❌ Falha ao carregar ranking:', error);
       setVictoryRankingStatus('error');
       setVictoryRankingErrorMessage(errorMessage);
+
+      // Em escola/turma, erros devolvidos pela API (ex.: aluno sem turma) aparecem só no painel do ranking
+      if (tipo !== 'global' && !isNetworkFailureError(error)) {
+        return;
+      }
+
       onNetworkFailure({
         resourceLabel: 'RANKING',
         context: 'victory',
@@ -626,9 +636,11 @@ const GameContent: React.FC<GameContentProps> = ({ onNetworkFailure }) => {
       return;
     }
 
-    victoryPanelRequestRef.current = victoryPanelLoadNonce;
-    void carregarRankingDaVitoria(victoryPanelLoadNonce);
-  }, [showVictoryPanel, victoryPanelLoadNonce, carregarRankingDaVitoria]);
+    // Cada busca (nova partida ou troca de Global/Escola/Turma) invalida a anterior
+    const requestId = victoryPanelRequestRef.current + 1;
+    victoryPanelRequestRef.current = requestId;
+    void carregarRankingDaVitoria(requestId, victoryRankingTipo);
+  }, [showVictoryPanel, victoryPanelLoadNonce, victoryRankingTipo, carregarRankingDaVitoria]);
   
   // Refs para manter valores atualizados de hits e newsHistory (para evitar problemas de closure)
   const hitsRef = useRef<number>(0);
@@ -830,6 +842,11 @@ const GameContent: React.FC<GameContentProps> = ({ onNetworkFailure }) => {
   }, []);
 
   const handleNextNewsClick = useCallback(() => {
+    // Partida encerrada: não há próxima notícia
+    if (victoryFlowStartedRef.current) {
+      return;
+    }
+
     if (newsRef.current.length === 0) {
       onNetworkFailure({
         resourceLabel: 'BOTÃO Próxima Notícia',
@@ -2535,6 +2552,7 @@ const GameContent: React.FC<GameContentProps> = ({ onNetworkFailure }) => {
     setVictoryRankingCurrentPlayerEntry(null);
     setVictoryRankingErrorMessage(null);
     setVictoryPanelLoadNonce(0);
+    setVictoryRankingTipo('global');
     setGameStarted(false);
     setPendingSelectedCharacters(null);
     setSelectedCharacterId(availableCharacters[0]?.id || 'caio');
@@ -3666,6 +3684,8 @@ const GameContent: React.FC<GameContentProps> = ({ onNetworkFailure }) => {
         rankingTopEntries={victoryRankingTopEntries}
         rankingCurrentPlayerEntry={victoryRankingCurrentPlayerEntry}
         rankingErrorMessage={victoryRankingErrorMessage}
+        rankingTipo={victoryRankingTipo}
+        onRankingTipoChange={setVictoryRankingTipo}
         onRestart={handleRestartGame}
       />
 
@@ -4095,6 +4115,7 @@ const GameContent: React.FC<GameContentProps> = ({ onNetworkFailure }) => {
         <button
           className="next-news-button"
           onClick={handleNextNewsClick}
+          disabled={showVictoryPanel}
         >
           Próxima Notícia
         </button>

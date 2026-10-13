@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import './VictoryPanel.css';
-import { RankingEntry, VictoryRankingStatus } from '../types/ranking';
+import { RankingEntry, RankingTipo, VictoryRankingStatus } from '../types/ranking';
 
 const RANKING_DESIGN_WIDTH = 620;
 const RANKING_DESIGN_HEIGHT = 700;
@@ -11,8 +11,16 @@ interface VictoryPanelProps {
   rankingTopEntries: RankingEntry[];
   rankingCurrentPlayerEntry: RankingEntry | null;
   rankingErrorMessage: string | null;
+  rankingTipo: RankingTipo;
+  onRankingTipoChange: (tipo: RankingTipo) => void;
   onRestart: () => void;
 }
+
+const RANKING_TIPO_OPTIONS: { value: RankingTipo; label: string }[] = [
+  { value: 'global', label: 'Global' },
+  { value: 'escola', label: 'Escola' },
+  { value: 'turma', label: 'Turma' }
+];
 
 interface VictoryAvatarProps {
   avatarSrc: string;
@@ -97,6 +105,8 @@ const VictoryPanel: React.FC<VictoryPanelProps> = ({
   rankingTopEntries,
   rankingCurrentPlayerEntry,
   rankingErrorMessage,
+  rankingTipo,
+  onRankingTipoChange,
   onRestart
 }) => {
   const [activeAvatarPreview, setActiveAvatarPreview] = useState<{ src: string; playerName: string } | null>(null);
@@ -156,12 +166,13 @@ const VictoryPanel: React.FC<VictoryPanelProps> = ({
     const redBold = 'style="color: var(--jedi-pink); font-size: 1.5rem; font-weight: bold;"';
     const normalText = 'style="font-size: 1.5rem; font-weight: normal;"';
 
-    if (rankingCurrentPlayerEntry?.autoAvaliacao === rankingCurrentPlayerEntry?.avaliacaoJogo) {
-      return `<p ${normalText}>Você se avaliou da mesma forma que o jogo: <br/><strong>${rankingCurrentPlayerEntry?.autoAvaliacao || ''}</strong></p>`;
-    }
+    const autoAvaliacao = rankingCurrentPlayerEntry?.autoAvaliacao || '';
+    const avaliacaoJogo = rankingCurrentPlayerEntry?.avaliacaoJogo || '';
+    // Destaca em vermelho apenas quando as avaliações divergem
+    const valueStyle = autoAvaliacao === avaliacaoJogo ? '' : redBold;
 
-    return `<p ${normalText}>Você se avaliou como <strong ${redBold}>${rankingCurrentPlayerEntry?.autoAvaliacao || ''}</strong> 
-    <br/> e o jogo avaliou você como <strong ${redBold}>${rankingCurrentPlayerEntry?.avaliacaoJogo || ''}</strong></p>`;
+    return `<p ${normalText}>Você se avaliou como: <strong ${valueStyle}>${autoAvaliacao}</strong>
+    <br/>Você foi avaliado pelo JEDI como: <strong ${valueStyle}>${avaliacaoJogo}</strong></p>`;
   }, [rankingCurrentPlayerEntry]);
 
   return (
@@ -192,18 +203,20 @@ const VictoryPanel: React.FC<VictoryPanelProps> = ({
           </section>
 
           <div className="victory-panel-ranking-type">
-            <label htmlFor="ranking-type-global">
-              <input type="radio" id="ranking-type-global" name="ranking-type" value="global" checked />
-              Global
-            </label>
-            <label htmlFor="ranking-type-school">
-              <input type="radio" id="ranking-type-school" name="ranking-type" value="school" />
-              Escola
-            </label>
-            <label htmlFor="ranking-type-class">
-              <input type="radio" id="ranking-type-class" name="ranking-type" value="class" />
-              Turma
-            </label>
+            {RANKING_TIPO_OPTIONS.map(({ value, label }) => (
+              <label htmlFor={`ranking-type-${value}`} key={value}>
+                <input
+                  type="radio"
+                  id={`ranking-type-${value}`}
+                  name="ranking-type"
+                  value={value}
+                  checked={rankingTipo === value}
+                  disabled={rankingStatus === 'loading' || rankingStatus === 'idle'}
+                  onChange={() => onRankingTipoChange(value)}
+                />
+                {label}
+              </label>
+            ))}
           </div>
         </section>
 

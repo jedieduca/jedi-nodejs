@@ -6,6 +6,7 @@ const AUTH_URL = getBackendEndpoint('autenticar');
 const REGISTER_URL = getBackendEndpoint('cadastrarUsuario');
 const RECOVER_PASSWORD_URL = getBackendEndpoint('recuperarSenha');
 const RESET_PASSWORD_URL = getBackendEndpoint('redefinirSenha');
+const CHANGE_PASSWORD_URL = getBackendEndpoint('trocarSenha');
 
 export const PASSWORD_MIN_LENGTH = 8;
 
@@ -17,6 +18,10 @@ export const RECOVER_PASSWORD_ERROR_MESSAGE =
 
 export const RESET_PASSWORD_SUCCESS_MESSAGE = 'Senha alterada com sucesso! Faça login com a nova senha.';
 export const RESET_PASSWORD_ERROR_MESSAGE = 'Não foi possível redefinir a senha neste momento. Tente novamente.';
+
+export const CHANGE_PASSWORD_SUCCESS_MESSAGE = 'Senha alterada com sucesso. Faça login com a nova senha.';
+export const CHANGE_PASSWORD_ERROR_MESSAGE = 'Não foi possível trocar a senha. Tente novamente.';
+export const CHANGE_PASSWORD_SAME_AS_CURRENT_MESSAGE = 'A nova senha deve ser diferente da senha atual.';
 
 export const REGISTER_EMAIL_IN_USE_MESSAGE = 'Este e-mail já está cadastrado. Faça login ou recupere sua senha.';
 export const REGISTER_LOGIN_IN_USE_MESSAGE = 'Este login já está em uso. Escolha outro.';
@@ -292,9 +297,53 @@ export const redefinirSenha = async (payload: ResetPasswordPayload): Promise<voi
   }
 };
 
+export interface ChangePasswordPayload {
+  login: string;
+  senhaAntiga: string;
+  senhaNova: string;
+}
+
+export const trocarSenha = async (payload: ChangePasswordPayload): Promise<void> => {
+  let response: Response;
+  try {
+    response = await fetch(CHANGE_PASSWORD_URL, {
+      method: 'POST',
+      mode: 'cors',
+      credentials: 'omit',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        login: payload.login,
+        senhaAntiga: payload.senhaAntiga,
+        senhaNova: payload.senhaNova
+      })
+    });
+  } catch (error) {
+    if (isFetchFailure(error)) {
+      throw toNetworkFailureError(error, 'TROCA DE SENHA', CHANGE_PASSWORD_URL, 'auth');
+    }
+    throw error;
+  }
+
+  if (response.status >= 500) {
+    throw toNetworkFailureError(new Error(`HTTP ${response.status}`), 'TROCA DE SENHA', CHANGE_PASSWORD_URL, 'auth');
+  }
+
+  const data = await readResponsePayload(response);
+  throwServerResponseError(response, data);
+
+  // A API devolve a quantidade de registros alterados: 1 = senha trocada
+  if (data !== 1) {
+    throw new Error(CHANGE_PASSWORD_ERROR_MESSAGE);
+  }
+};
+
 const authService = {
   autenticar,
   cadastrar,
+  trocarSenha,
   recuperarSenha,
   redefinirSenha
 };

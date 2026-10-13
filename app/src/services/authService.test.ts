@@ -5,12 +5,15 @@ import {
   REGISTER_GENERIC_ERROR_MESSAGE,
   REGISTER_LOGIN_IN_USE_MESSAGE,
   RESET_PASSWORD_ERROR_MESSAGE,
+  CHANGE_PASSWORD_ERROR_MESSAGE,
   cadastrar,
   recuperarSenha,
-  redefinirSenha
+  redefinirSenha,
+  trocarSenha
 } from './authService';
 
 const REGISTER_URL = 'https://api2.jedieduca.com.br/api/system_user/cadastrar';
+const CHANGE_PASSWORD_URL = 'https://api2.jedieduca.com.br/api/system_user/trocarSenha';
 const RECOVER_PASSWORD_URL = 'https://api2.jedieduca.com.br/api/system_user/recuperarSenha';
 const RESET_PASSWORD_URL = 'https://api2.jedieduca.com.br/api/system_user/redefinirSenha';
 const RESET_TOKEN = 'a'.repeat(64);
@@ -289,6 +292,71 @@ describe('authService.redefinirSenha', () => {
     })).rejects.toMatchObject({
       resourceLabel: 'REDEFINIÇÃO DE SENHA',
       source: RESET_PASSWORD_URL,
+      context: 'auth'
+    });
+  });
+});
+
+describe('authService.trocarSenha', () => {
+  const fetchMock = jest.fn();
+  const payload = {
+    login: 'aluno4.almirante',
+    senhaAntiga: 'senhaAntiga',
+    senhaNova: 'senhaNova123'
+  };
+
+  beforeEach(() => {
+    fetchMock.mockReset();
+    global.fetch = fetchMock as unknown as typeof fetch;
+  });
+
+  it('posts the login and both passwords to the Jedieduca endpoint', async () => {
+    fetchMock.mockResolvedValue(mockJsonResponse(1));
+
+    await expect(trocarSenha(payload)).resolves.toBeUndefined();
+
+    expect(fetchMock).toHaveBeenCalledWith(CHANGE_PASSWORD_URL, {
+      method: 'POST',
+      mode: 'cors',
+      credentials: 'omit',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+  });
+
+  it('shows the message returned by the API when the current password is wrong', async () => {
+    fetchMock.mockResolvedValue(mockJsonResponse({
+      erro: 'Usuário ou senha atual incorretos.'
+    }, false, 400));
+
+    await expect(trocarSenha(payload)).rejects.toEqual(new Error('Usuário ou senha atual incorretos.'));
+  });
+
+  it('extracts only the error message when the server prefixes the request echo', async () => {
+    fetchMock.mockResolvedValue(mockTextResponse(
+      '{"metodo":"POST","rota":"SYSTEM_USER","recurso":"trocarSenha","id":null}{"erro":"Usu\\u00e1rio n\\u00e3o registrado!"}',
+      false,
+      400
+    ));
+
+    await expect(trocarSenha(payload)).rejects.toEqual(new Error('Usuário não registrado!'));
+  });
+
+  it('throws the generic error when no record is updated', async () => {
+    fetchMock.mockResolvedValue(mockJsonResponse(0));
+
+    await expect(trocarSenha(payload)).rejects.toThrow(CHANGE_PASSWORD_ERROR_MESSAGE);
+  });
+
+  it('throws NetworkFailureError when the server fails', async () => {
+    fetchMock.mockResolvedValue(mockTextResponse('', false, 500));
+
+    await expect(trocarSenha(payload)).rejects.toMatchObject({
+      resourceLabel: 'TROCA DE SENHA',
+      source: CHANGE_PASSWORD_URL,
       context: 'auth'
     });
   });

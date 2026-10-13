@@ -1,10 +1,12 @@
 import React, { FormEvent, useMemo, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { getBackendEndpoint } from '../config/backend';
-import { NetworkFailureDetails, isFetchFailure, isNetworkFailureError, toNetworkFailureError } from '../utils/networkFailure';
+import {
+  CHANGE_PASSWORD_SAME_AS_CURRENT_MESSAGE,
+  CHANGE_PASSWORD_SUCCESS_MESSAGE,
+  trocarSenha
+} from '../services/authService';
+import { NetworkFailureDetails, isNetworkFailureError } from '../utils/networkFailure';
 import './LoginScreen.css';
-
-const CHANGE_PASSWORD_URL = getBackendEndpoint('trocarSenha');
 
 interface LoginScreenProps {
   onGoToRegister?: () => void;
@@ -67,53 +69,23 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onGoToRegister, onGoToForgotP
         setError('A nova senha e a repetição da senha devem ser iguais.');
         return;
       }
+
+      if (novaSenha === password) {
+        setError(CHANGE_PASSWORD_SAME_AS_CURRENT_MESSAGE);
+        return;
+      }
     }
 
     setIsSubmitting(true);
     try {
       if (isTrocarSenha) {
-        let response: Response;
-        try {
-          response = await fetch(CHANGE_PASSWORD_URL, {
-            method: 'POST',
-            mode: 'cors',
-            credentials: 'omit',
-            headers: {
-              Accept: 'application/json',
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              login: loginValue.trim(),
-              senhaAntiga: password,
-              senhaNova: novaSenha
-            })
-          });
-        } catch (error) {
-          if (isFetchFailure(error)) {
-            throw toNetworkFailureError(error, 'TROCA DE SENHA', CHANGE_PASSWORD_URL, 'auth');
-          }
-          throw error;
-        }
+        await trocarSenha({
+          login: loginValue.trim(),
+          senhaAntiga: password,
+          senhaNova: novaSenha
+        });
 
-        let rawText = '';
-        try {
-          rawText = (await response.text()).trim();
-        } catch (error) {
-          throw toNetworkFailureError(error, 'TROCA DE SENHA', CHANGE_PASSWORD_URL, 'auth');
-        }
-
-        if (!response.ok) {
-          if (response.status >= 500) {
-            throw toNetworkFailureError(new Error(`HTTP ${response.status}`), 'TROCA DE SENHA', CHANGE_PASSWORD_URL, 'auth');
-          }
-          throw new Error(rawText || `Falha ao trocar senha: HTTP ${response.status}`);
-        }
-
-        if (rawText !== '1') {
-          throw new Error(rawText || 'Não foi possível trocar a senha. Tente novamente.');
-        }
-
-        setSuccessMessage('Senha alterada com sucesso. Faça login com a nova senha.');
+        setSuccessMessage(CHANGE_PASSWORD_SUCCESS_MESSAGE);
         setPassword('');
         setNovaSenha('');
         setRepetirSenha('');

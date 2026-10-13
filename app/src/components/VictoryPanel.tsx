@@ -23,7 +23,7 @@ const RANKING_TIPO_OPTIONS: { value: RankingTipo; label: string }[] = [
 ];
 
 interface VictoryAvatarProps {
-  avatarSrc: string;
+  avatarName: string;
   playerName: string;
   onPreviewStart: (avatarSrc: string, playerName: string) => void;
   onPreviewEnd: () => void;
@@ -59,10 +59,53 @@ const removeAccents = (str: string): string => {
   return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 };
 
-const getAvatarSrc = (entry: RankingEntry): string => {
-  return `/assets/sprites/avatar-jedi-${removeAccents(entry.jogador)}.png`;
+const AVATAR_BASE_PATH = `${process.env.PUBLIC_URL ?? ''}/assets/sprites/avatar-jedi-`;
+
+// Imagem original (752x926, ~600 KB): usada só na prévia ampliada
+const getAvatarSrc = (avatarName: string): string => {
+  return `${AVATAR_BASE_PATH}${removeAccents(avatarName)}.png`;
 };
 
+// Miniatura (120x148, ~30 KB): usada nas linhas do ranking
+const getAvatarThumbSrc = (avatarName: string): string => {
+  return `${AVATAR_BASE_PATH}${removeAccents(avatarName)}-mini.png`;
+};
+
+
+// Nome exibido: primeiro nome + inicial do cadastro; sem cadastro, o apelido; sem apelido, o avatar
+const getDisplayName = (entry: RankingEntry): string => {
+  return entry.nomeCurto || entry.nome?.trim() || entry.jogador;
+};
+
+interface RankingPlayerNameProps {
+  entry: RankingEntry;
+  rankingTipo: RankingTipo;
+  isCurrentPlayer?: boolean;
+}
+
+// Linha 1: nome + etiqueta da turma; linha 2: apelido · escola.
+// A escola só aparece no ranking Global e a turma some no ranking da Turma (seriam iguais para todos).
+const RankingPlayerName: React.FC<RankingPlayerNameProps> = ({ entry, rankingTipo, isCurrentPlayer = false }) => {
+  const displayName = getDisplayName(entry);
+  const apelido = entry.nomeCurto ? entry.nome?.trim() ?? '' : '';
+  const turma = rankingTipo !== 'turma' ? entry.turma : '';
+  const escola = rankingTipo === 'global' ? entry.escola : '';
+  const subParts = [apelido ? `“${apelido}”` : '', escola].filter(Boolean);
+  const title = [displayName, turma, apelido, escola].filter(Boolean).join(' · ');
+
+  return (
+    <div className="victory-ranking-name" title={title}>
+      <span className="victory-ranking-name-main">
+        <span className="victory-ranking-name-text">{displayName}</span>
+        {turma ? <span className="victory-ranking-turma">{turma}</span> : null}
+        {isCurrentPlayer ? <span className="victory-ranking-player-label">(você)</span> : null}
+      </span>
+      {subParts.length > 0 ? (
+        <span className="victory-ranking-name-sub">{subParts.join(' · ')}</span>
+      ) : null}
+    </div>
+  );
+};
 
 const isSameRankingEntry = (left: RankingEntry, right: RankingEntry): boolean => {
   return (
@@ -73,11 +116,31 @@ const isSameRankingEntry = (left: RankingEntry, right: RankingEntry): boolean =>
 };
 
 const VictoryAvatar: React.FC<VictoryAvatarProps> = ({
-  avatarSrc,
+  avatarName,
   playerName,
   onPreviewStart,
   onPreviewEnd
 }) => {
+  const thumbSrc = getAvatarThumbSrc(avatarName);
+  const [failedSrc, setFailedSrc] = useState<string | null>(null);
+
+  // Avatar ausente ou que não carregou: mostra a inicial no lugar da imagem, sem prévia ampliada
+  if (!avatarName.trim() || failedSrc === thumbSrc) {
+    return (
+      <div className="victory-ranking-avatar-wrap">
+        <span
+          aria-label={`Avatar de ${playerName}`}
+          className="victory-ranking-avatar victory-ranking-avatar-fallback"
+          role="img"
+        >
+          {avatarName.trim().charAt(0).toUpperCase() || '?'}
+        </span>
+      </div>
+    );
+  }
+
+  const avatarSrc = getAvatarSrc(avatarName);
+
   return (
     <div className="victory-ranking-avatar-wrap">
       <button
@@ -92,7 +155,8 @@ const VictoryAvatar: React.FC<VictoryAvatarProps> = ({
         <img
           alt={`Avatar de ${playerName}`}
           className="victory-ranking-avatar"
-          src={avatarSrc}
+          src={thumbSrc}
+          onError={() => setFailedSrc(thumbSrc)}
         />
       </button>
     </div>
@@ -274,7 +338,6 @@ const VictoryPanel: React.FC<VictoryPanelProps> = ({
                     <div className="victory-ranking-body">
                       {displayedTopEntries.map((entry, index) => {
                         const entryKey = getEntryKey(entry, index);
-                        const avatarSrc = getAvatarSrc(entry);
                         const isTopThree = entry.posicao <= 3;
                         const isCurrentPlayerDuplicate = rankingCurrentPlayerEntry
                           ? isSameRankingEntry(entry, rankingCurrentPlayerEntry)
@@ -289,17 +352,16 @@ const VictoryPanel: React.FC<VictoryPanelProps> = ({
                               {formatPosition(entry.posicao)}
                             </div>
                             <VictoryAvatar
-                              avatarSrc={avatarSrc}
-                              playerName={entry.jogador}
+                              avatarName={entry.jogador}
+                              playerName={getDisplayName(entry)}
                               onPreviewStart={handlePreviewStart}
                               onPreviewEnd={handlePreviewEnd}
                             />
-                            <div className="victory-ranking-name" title={entry.nome}>
-                              {entry.nome} [ {entry.jogador} ]
-                              {isCurrentPlayerDuplicate ? (
-                                <span className="victory-ranking-player-label">(você)</span>
-                              ) : null}
-                            </div>
+                            <RankingPlayerName
+                              entry={entry}
+                              rankingTipo={rankingTipo}
+                              isCurrentPlayer={isCurrentPlayerDuplicate}
+                            />
                             <div className="victory-ranking-cell-score">
                               {formatScore(entry.pontuacao)}
                             </div>
@@ -328,14 +390,12 @@ const VictoryPanel: React.FC<VictoryPanelProps> = ({
                           {formatPosition(rankingCurrentPlayerEntry.posicao)}
                         </div>
                         <VictoryAvatar
-                          avatarSrc={ getAvatarSrc(rankingCurrentPlayerEntry) || '' }
-                          playerName={rankingCurrentPlayerEntry.nome || ''}
+                          avatarName={rankingCurrentPlayerEntry.jogador}
+                          playerName={getDisplayName(rankingCurrentPlayerEntry)}
                           onPreviewStart={handlePreviewStart}
                           onPreviewEnd={handlePreviewEnd}
                         />
-                        <div className="victory-ranking-name" title={rankingCurrentPlayerEntry.jogador}>
-                          {(rankingCurrentPlayerEntry.nome || '') +` [ ${rankingCurrentPlayerEntry.jogador} ]`}
-                        </div>
+                        <RankingPlayerName entry={rankingCurrentPlayerEntry} rankingTipo={rankingTipo} />
                         <div className="victory-ranking-cell-score">
                           {formatScore(rankingCurrentPlayerEntry.pontuacao)}
                         </div>
@@ -360,6 +420,7 @@ const VictoryPanel: React.FC<VictoryPanelProps> = ({
                   alt={`Avatar ampliado de ${activeAvatarPreview.playerName}`}
                   className="victory-panel-avatar-overlay-image"
                   src={activeAvatarPreview.src}
+                  onError={handlePreviewEnd}
                 />
               ) : null}
             </div>

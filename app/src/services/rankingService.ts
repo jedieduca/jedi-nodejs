@@ -49,7 +49,10 @@ const normalizeRankingEntry = (rawEntry: RankingApiEntryRaw): RankingEntry => {
     percentualAcertos: parseNumericField(rawEntry.percentualAcertos, 'percentualAcertos'),
     tempoGasto: parseNumericField(rawEntry.tempoGasto, 'tempoGasto'),
     totalPartidas: parseNumericField(rawEntry.totalPartidas, 'totalPartidas'),
-    posicao: parseNumericField(rawEntry.posicao, 'posicao')
+    posicao: parseNumericField(rawEntry.posicao, 'posicao'),
+    nomeCurto: String(rawEntry.nomeCurto ?? '').trim(),
+    escola: String(rawEntry.escola ?? '').trim(),
+    turma: String(rawEntry.turma ?? '').trim()
   };
 };
 

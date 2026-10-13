@@ -12,7 +12,10 @@ export interface RankingApiEntryRaw {
   totalPartidas: string | number;
   posicao: string | number;
   autoAvaliacao: string;
-  avaliacaoJogo: string;  
+  avaliacaoJogo: string;
+  nomeCurto?: string;
+  escola?: string;
+  turma?: string;
 }
 
 export interface RankingApiError {
@@ -30,6 +33,11 @@ export interface RankingEntry {
   posicao: number;
   autoAvaliacao: string;
   avaliacaoJogo: string;
+  /** Primeiro nome + inicial do sobrenome do cadastro ("Maria F."); vazio se o jogador não tem cadastro */
+  nomeCurto: string;
+  /** Nome curto da escola ("Alm. Tamandaré"); vazio se o jogador não tem vínculo escolar */
+  escola: string;
+  turma: string;
 }
 
 export type VictoryRankingStatus = 'idle' | 'loading' | 'success' | 'error';

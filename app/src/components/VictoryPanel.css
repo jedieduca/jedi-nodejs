@@ -300,12 +300,66 @@
 }
 
 .victory-ranking-name {
+  display: grid;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   font-weight: 800;
   font-size: 1.8rem;
+  line-height: 1.2;
+}
+
+/* Linha 1: nome + etiqueta da turma (+ "você") */
+.victory-ranking-name-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.victory-ranking-name-text {
+  flex: none;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Turma em etiqueta: textos longos (ex.: "NEM EPT IF TEC...") são cortados só aqui; o texto completo fica no title */
+.victory-ranking-turma {
+  min-width: 0;
+  max-width: 11em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 1px 9px;
+  border-radius: 999px;
+  background: rgba(92, 198, 208, 0.18);
+  color: #0e6670;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+/* Linha 2: apelido · escola */
+.victory-ranking-name-sub {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.victory-ranking-player-row .victory-ranking-turma {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.victory-ranking-player-row .victory-ranking-name-sub {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.victory-ranking-name-main .victory-ranking-player-label {
+  flex: none;
+  margin-left: 0;
 }
 
 .victory-ranking-player-label {
@@ -350,6 +404,17 @@
   box-shadow:
     0 4px 12px rgba(0, 0, 0, 0.14),
     inset 0 0 0 1px rgba(255, 255, 255, 0.24);
+}
+
+/* Avatar que não carregou: círculo com a inicial */
+.victory-ranking-avatar-fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #7c3aed 0%, #5cc6d0 100%);
+  color: #fff;
+  font-weight: bold;
+  font-size: 1.1rem;
 }
 
 .victory-panel-avatar-overlay {

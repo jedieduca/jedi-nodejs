@@ -9,6 +9,11 @@ services:
     volumes:
       - ./app:/app
       - /app/node_modules
+    environment:
+      # Volume vindo do Windows não avisa o container quando um arquivo muda;
+      # com polling o servidor de desenvolvimento recompila ao salvar
+      - WATCHPACK_POLLING=true
+      - CHOKIDAR_USEPOLLING=true
     networks:
       - jedieduca-network
 

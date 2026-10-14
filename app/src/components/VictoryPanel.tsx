@@ -260,7 +260,7 @@ const VictoryPanel: React.FC<VictoryPanelProps> = ({
             onClick={onRestart}
             type="button"
           >
-            🔄 Reiniciar
+            🔄 Reiniciar/Sair
           </button>
           <section style={{ margin: '15px 0' }} className="victory-panel-subtitle">
             <div dangerouslySetInnerHTML={{ __html: performanceMessage }} />

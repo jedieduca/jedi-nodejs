@@ -33,7 +33,7 @@ class NewsService {
   /**
    * Busca todas as notícias disponíveis
    */
-  public async getNews(quantidade: number = 100): Promise<NewsResponse> {
+  public async getNews(quantidade: number = 200): Promise<NewsResponse> {
     try {
       const response = await apiService.post<any>('news', { quantidade });
 

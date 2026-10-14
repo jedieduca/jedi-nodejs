@@ -1658,7 +1658,7 @@ const GameContent: React.FC<GameContentProps> = ({ onNetworkFailure }) => {
         setVictoryRankingTopEntries([]);
         setVictoryRankingCurrentPlayerEntry(null);
         setShowVictoryPanel(true);
-        narrate('Parabéns! Você arrazou!');
+        narrate('Parabéns, você concluiu a partida!');
         if (activePlayer) {
           activePlayer.movesLeft = 0;
         }
@@ -1952,7 +1952,7 @@ const GameContent: React.FC<GameContentProps> = ({ onNetworkFailure }) => {
       // if (currentTile && currentTile.type === 'fim') {
       //   console.log('🏆 [handleMultiPlayerPositionChange] Jogador chegou ao fim do mapa! Mostrando painel de vitória...');
       //   setShowVictoryPanel(true);
-      //   narrate('Parabéns! Você arrazou!');
+      //   narrate('Parabéns, você concluiu a partida!');
       //   return;
       // }
       // Verificar se atingiu o tile 36,44 (multiplayer)

@@ -3237,28 +3237,41 @@ const GameContent: React.FC<GameContentProps> = ({ onNetworkFailure }) => {
       if (shouldReverse) {
         setDirectionForJulgamento(getOppositeDirection(initialDirection));
         await playerInstanceRef.current.gotoBackward(absoluteAcceleratedSteps);
-        
-        //setDirectionForJulgamento(initialDirection);
 
+        // Após o recuo, lastPosition aponta para o tile "à frente" (o que acabamos de deixar).
+        // É preciso apontá-la para o tile "atrás" segundo o sentido do caminho NA CASA DE CHEGADA,
+        // e não segundo a direção anterior ao recuo (initialDirection): se o recuo atravessou uma
+        // curva, initialDirection não vale mais e o avatar passaria a andar no sentido contrário.
         const finalPosition = playerInstanceRef.current.position;
-        const simulatedLastPosition = getSimulatedLastPosition(finalPosition, initialDirection);
+        const forwardTile = playerInstanceRef.current.lastPosition;
+        const finalPositionId = getPositionId(finalPosition);
+        const boardDirection = BOARD_POSITIONS.find(
+          position => position.position_id === finalPositionId)?.direction;
+
+        let simulatedLastPosition: Position;
+        if (boardDirection) {
+          simulatedLastPosition = getSimulatedLastPosition(finalPosition, boardDirection);
+        } else if (forwardTile) {
+          // Fora de uma casa (recuo interrompido): espelha o tile da frente em torno da posição final.
+          simulatedLastPosition = {
+            x: 2 * finalPosition.x - forwardTile.x,
+            y: 2 * finalPosition.y - forwardTile.y
+          };
+        } else {
+          simulatedLastPosition = getSimulatedLastPosition(finalPosition, initialDirection);
+        }
+
         playerInstanceRef.current.setLastPosition(simulatedLastPosition);
         if (players.length > 0) {
           setActivePlayerLastPosition(simulatedLastPosition);
         }
 
-
-        const currentPosition = playerInstanceRef.current?.position;
-        const currentPositionId = getPositionId(currentPosition ?? { x: 0, y: 0 });
-        const finalDirection = BOARD_POSITIONS.find(
-          position => position.position_id === currentPositionId)?.direction
-                    ?? Direction.DOWN;    
-        console.log('[Julgamento] posição atual:', currentPosition, 'id:', currentPositionId);
+        const finalDirection = boardDirection ?? getOppositeDirection(playerInstanceRef.current.direction);
+        console.log('[Julgamento] posição final:', finalPosition, 'id:', finalPositionId,
+          'lastPosition simulada:', simulatedLastPosition);
         console.log('[Julgamento] direção inicial:', initialDirection, 'direção final:', finalDirection);
-   
+
         setDirectionForJulgamento(finalDirection);
-
-
 
       } else {
         await playerInstanceRef.current.goto(absoluteAcceleratedSteps);
